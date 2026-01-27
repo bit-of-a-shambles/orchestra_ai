@@ -56,4 +56,17 @@ module OrchestraAI
       super(message)
     end
   end
+
+  # Budget errors
+  class BudgetError < Error; end
+  class BudgetExceededError < BudgetError
+    attr_reader :provider, :required, :available
+
+    def initialize(message, provider: nil, required: nil, available: nil)
+      @provider = provider
+      @required = required
+      @available = available
+      super(message)
+    end
+  end
 end

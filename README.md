@@ -1,6 +1,6 @@
 # OrchestraAI
 
-[![Coverage](https://img.shields.io/badge/coverage-96.95%25-brightgreen)](coverage/index.html)
+[![Coverage](https://img.shields.io/badge/coverage-95.82%25-brightgreen)](coverage/index.html)
 
 A simple AI agent orchestrator with role-based execution, parallel processing, task difficulty scoring, and cost optimisation.
 
@@ -223,6 +223,7 @@ The Reviewer agent is specifically designed to:
 - **Role-Based Agents**: Architect, Implementer, and Reviewer agents with specialized prompts
 - **Task Difficulty Scoring**: Automatic complexity assessment to select appropriate models
 - **Execution Patterns**: Sequential, Parallel, Pipeline, and Router patterns
+- **Cost Planning & Budgets**: Pre-execution estimates, per-provider budgets, and savings reports
 - **Cost Optimisation**: Automatically routes simple tasks to cheaper models
 - **Reliability**: Built-in retry policies and circuit breakers
 - **Testing Support**: Mock providers and Minitest assertions
@@ -388,6 +389,186 @@ result = router.execute(task)
 | Architect | gemini-2.5-flash | gpt-5-codex | claude-opus-4 |
 | Implementer | gemini-2.5-flash | gemini-2.5-flash | gpt-5-codex |
 | Reviewer | gemini-2.5-flash | gpt-5-codex | claude-opus-4 |
+
+## Cost Planning & Budget Management
+
+OrchestraAI includes a comprehensive cost planning module that helps you:
+- **Estimate costs** before execution with confidence intervals
+- **Set per-provider budgets** to control spending
+- **Track actual costs** across sessions
+- **Generate savings reports** comparing your usage to premium-only models
+
+### Budget Configuration
+
+```ruby
+OrchestraAI.configure do |c|
+  # Set per-provider budget limits (in USD)
+  c.budget.limits = {
+    anthropic: 10.0,  # $10 for Claude models
+    openai: 5.0,      # $5 for GPT models
+    google: 2.0       # $2 for Gemini models
+  }
+  
+  # Alert when 80% of budget is consumed (default: 0.8)
+  c.budget.alert_threshold = 0.8
+  
+  # Enforce budget limits (default: false)
+  c.budget.enforce_limits = true
+  
+  # Fallback strategy when budget exceeded: :warn, :downgrade, or :reject
+  c.budget.fallback_strategy = :downgrade
+end
+```
+
+### Pre-Execution Cost Estimation
+
+Before executing a task, you can estimate the cost with confidence intervals:
+
+```ruby
+conductor = OrchestraAI::Orchestration::Conductor.new
+task = OrchestraAI::Tasks::Definition.new(description: "Design a REST API")
+
+# Get execution plan with cost estimates
+plan = conductor.plan(task)
+
+puts plan.summary
+# Output:
+# Execution Plan
+# ==============
+# Estimated cost: $0.0052 (range: $0.0042 - $0.0068)
+# Sufficiency: sufficient
+# Stages: architect -> implementer -> reviewer
+# Can execute: Yes
+
+# Check budget sufficiency
+if plan.sufficient?
+  result = conductor.execute(task)
+elsif plan.partial?
+  puts "Partial execution possible. Continue? (y/n)"
+  # User decides...
+else
+  puts "Insufficient budget"
+end
+```
+
+Cost estimates include a **1.3x safety multiplier** to account for variability in token usage.
+
+### ExecutionPlan Details
+
+The `ExecutionPlan` object provides:
+
+```ruby
+plan = conductor.plan(task)
+
+# Cost estimates with confidence intervals
+plan.estimated_cost         # Point estimate (e.g., 0.0052)
+plan.cost_range             # [low, high] range
+plan.cost_by_provider       # { anthropic: 0.003, openai: 0.002 }
+
+# Sufficiency assessment
+plan.sufficiency            # :sufficient, :partial, or :insufficient
+plan.sufficient?            # All stages can execute
+plan.partial?               # Some stages can execute
+plan.insufficient?          # Cannot execute any stage
+plan.executable?            # true if sufficient or partial
+
+# Potential savings vs premium model
+plan.potential_savings      # { amount: 12.50, percentage: 89.2 }
+
+# Stage details
+plan.stages                 # [:architect, :implementer, :reviewer]
+plan.stage_details          # Detailed per-stage estimates
+```
+
+### Real-Time Cost Tracking
+
+Track costs during execution:
+
+```ruby
+conductor = OrchestraAI::Orchestration::Conductor.new
+
+# Execute tasks (costs are tracked automatically)
+result1 = conductor.execute(task1)
+result2 = conductor.execute(task2)
+
+# View cost breakdown
+puts conductor.tracker.cost_by_provider
+# { anthropic: 0.0023, openai: 0.0015, google: 0.0008 }
+
+puts conductor.tracker.cost_by_model
+# { "claude-sonnet-4" => 0.0023, "gpt-5-codex" => 0.0015, "gemini-2.5-flash" => 0.0008 }
+
+puts conductor.tracker.cost_by_agent
+# { architect: 0.001, implementer: 0.002, reviewer: 0.001 }
+
+# Total session cost
+puts conductor.tracker.total_cost  # 0.0046
+```
+
+### Savings Reports
+
+Compare your actual costs to using premium models only:
+
+```ruby
+puts conductor.savings_summary
+# Cost Savings Summary
+# ====================
+# Actual cost: $0.0046
+# Premium cost: $0.0520
+# Savings: $0.0474 (91.2%)
+```
+
+Or get detailed savings data:
+
+```ruby
+report = conductor.savings_report
+
+report[:actual_cost]       # What you actually spent
+report[:premium_cost]      # What it would cost with claude-opus-4.5 only
+report[:savings]           # Absolute savings
+report[:savings_percentage] # Percentage saved
+report[:task_count]        # Number of tasks tracked
+```
+
+### Budget Enforcement Strategies
+
+When `enforce_limits` is enabled and budget is exceeded:
+
+| Strategy | Behaviour |
+|----------|-----------|
+| `:warn` | Log a warning but continue execution |
+| `:downgrade` | Switch to a cheaper model if available |
+| `:reject` | Raise `BudgetExceededError` |
+
+```ruby
+# With :reject strategy, you can rescue the error
+begin
+  result = conductor.execute(task)
+rescue OrchestraAI::BudgetExceededError => e
+  puts "Budget exceeded for #{e.provider}"
+  puts "Required: $#{e.required}, Available: $#{e.available}"
+end
+```
+
+### Budget Status
+
+Check budget status at any time:
+
+```ruby
+budget = conductor.budget
+
+budget.remaining(:anthropic)       # Remaining budget for provider
+budget.exceeded?(:openai)          # true if over limit
+budget.at_alert_threshold?(:google) # true if at or above alert threshold
+
+# Get summary
+budget.status_summary
+# {
+#   anthropic: { spent: 2.50, limit: 10.0, remaining: 7.50, percentage: 25.0 },
+#   openai: { spent: 4.80, limit: 5.0, remaining: 0.20, percentage: 96.0 },
+#   google: { spent: 0.30, limit: 2.0, remaining: 1.70, percentage: 15.0 }
+# }
+```
 
 ## Testing
 

@@ -9,7 +9,7 @@ module OrchestraAI
     attr_accessor :logger, :log_level
 
     # Nested config objects
-    attr_reader :models, :difficulty, :retry_config, :circuit_breaker, :parallel
+    attr_reader :models, :difficulty, :retry_config, :circuit_breaker, :parallel, :budget
 
     def initialize
       @anthropic_api_key = ENV.fetch('ANTHROPIC_API_KEY', nil)
@@ -23,6 +23,7 @@ module OrchestraAI
       @retry_config = RetryConfig.new
       @circuit_breaker = CircuitBreakerConfig.new
       @parallel = ParallelConfig.new
+      @budget = BudgetConfig.new
     end
 
     def validate!
@@ -114,6 +115,41 @@ module OrchestraAI
       def initialize
         @max_threads = 4
         @timeout = 300
+      end
+    end
+
+    class BudgetConfig
+      attr_accessor :limits, :alert_threshold, :enforce_limits, :fallback_strategy
+
+      FALLBACK_STRATEGIES = %i[downgrade reject warn].freeze
+
+      def initialize
+        @limits = { anthropic: nil, openai: nil, google: nil }
+        @alert_threshold = 0.8
+        @enforce_limits = false
+        @fallback_strategy = :warn
+      end
+
+      def set_limit(provider, amount)
+        provider = provider.to_sym
+        unless %i[anthropic openai google].include?(provider)
+          raise ArgumentError, "Unknown provider: #{provider}"
+        end
+
+        @limits[provider] = amount&.to_f
+      end
+
+      def fallback_strategy=(strategy)
+        strategy = strategy.to_sym
+        unless FALLBACK_STRATEGIES.include?(strategy)
+          raise ArgumentError, "Invalid fallback strategy: #{strategy}. Valid: #{FALLBACK_STRATEGIES.join(', ')}"
+        end
+
+        @fallback_strategy = strategy
+      end
+
+      def to_budget
+        Costs::Budget.new(limits: @limits, alert_threshold: @alert_threshold)
       end
     end
   end
