@@ -1,0 +1,28 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+*.gem
+*.rbc
+.byebug_history
+.idea/
+.vscode/
+*.swp
+*.swo
+Gemfile.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# VCR cassettes (uncommitted by default)
+spec/cassettes/
+
+# OS files
+.DS_Store
+Thumbs.db
