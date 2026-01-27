@@ -52,19 +52,19 @@ module OrchestraAI
 
       def initialize
         @architect = RoleModelsConfig.new(
-          simple: 'gemini-2.0-flash',
-          moderate: 'gpt-5-codex',
-          complex: 'claude-opus-4-20250514'
+          simple: 'gemini-2.5-flash',
+          moderate: 'gpt-5.2-codex',
+          complex: 'claude-opus-4.5'
         )
         @implementer = RoleModelsConfig.new(
-          simple: 'gemini-2.0-flash',
-          moderate: 'gemini-2.0-flash',
-          complex: 'gpt-5-codex'
+          simple: 'gemini-2.5-flash',
+          moderate: 'gemini-2.5-flash',
+          complex: 'gpt-5.2-codex'
         )
         @reviewer = RoleModelsConfig.new(
-          simple: 'gemini-2.0-flash',
-          moderate: 'gpt-5-codex',
-          complex: 'claude-opus-4-20250514'
+          simple: 'gemini-2.5-flash',
+          moderate: 'gpt-5.2-codex',
+          complex: 'claude-opus-4.5'
         )
       end
     end

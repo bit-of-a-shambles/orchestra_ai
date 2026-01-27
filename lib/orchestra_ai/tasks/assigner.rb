@@ -44,8 +44,7 @@ module OrchestraAI
           model ||= task.assigned_model
           return nil unless model
 
-          provider_class = Providers::Registry.for_model(model)
-          info = provider_class::MODELS[model]
+          info = Providers::RubyLLMProvider::MODELS[model]
           return nil unless info
 
           # Rough token estimation: 4 chars per token

@@ -1,5 +1,16 @@
 # frozen_string_literal: true
 
+require 'simplecov'
+SimpleCov.start do
+  add_filter '/test/'
+  add_group 'Agents', 'lib/orchestra_ai/agents'
+  add_group 'Orchestration', 'lib/orchestra_ai/orchestration'
+  add_group 'Providers', 'lib/orchestra_ai/providers'
+  add_group 'Tasks', 'lib/orchestra_ai/tasks'
+  add_group 'Reliability', 'lib/orchestra_ai/reliability'
+  add_group 'Testing', 'lib/orchestra_ai/testing'
+end
+
 require 'bundler/setup'
 require 'minitest/autorun'
 require 'minitest/pride'

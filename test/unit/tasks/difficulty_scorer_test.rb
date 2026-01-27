@@ -76,4 +76,60 @@ class DifficultyScorerTest < Minitest::Test
 
     refute_equal :simple, OrchestraAI::Tasks::DifficultyScorer.classify(task)
   end
+
+  def test_very_long_descriptions_score_higher
+    short_task = OrchestraAI::Tasks::Definition.new(
+      description: 'Short task'
+    )
+
+    # Create a very long description (over 500 chars)
+    long_description = 'This is a very long task description that should trigger higher length scoring. ' * 10
+    long_task = OrchestraAI::Tasks::Definition.new(
+      description: long_description
+    )
+
+    short_score = OrchestraAI::Tasks::DifficultyScorer.score(short_task)
+    long_score = OrchestraAI::Tasks::DifficultyScorer.score(long_task)
+
+    assert long_score > short_score,
+           "Expected long_score (#{long_score}) > short_score (#{short_score})"
+  end
+
+  def test_context_with_many_items_scores_higher
+    task_few_ctx = OrchestraAI::Tasks::Definition.new(
+      description: 'Task',
+      context: ['One context item']
+    )
+
+    task_many_ctx = OrchestraAI::Tasks::Definition.new(
+      description: 'Task',
+      context: ['Context 1', 'Context 2', 'Context 3', 'Context 4', 'Context 5']
+    )
+
+    few_score = OrchestraAI::Tasks::DifficultyScorer.score(task_few_ctx)
+    many_score = OrchestraAI::Tasks::DifficultyScorer.score(task_many_ctx)
+
+    assert many_score > few_score,
+           "Expected many_score (#{many_score}) > few_score (#{few_score})"
+  end
+
+  def test_context_with_very_long_content_scores_higher
+    task_short_ctx = OrchestraAI::Tasks::Definition.new(
+      description: 'Task',
+      context: ['Short']
+    )
+
+    # Very long context should hit the length_score branch
+    very_long_context = 'A' * 10_000  # Over 5000 chars
+    task_long_ctx = OrchestraAI::Tasks::Definition.new(
+      description: 'Task',
+      context: [very_long_context]
+    )
+
+    short_score = OrchestraAI::Tasks::DifficultyScorer.score(task_short_ctx)
+    long_score = OrchestraAI::Tasks::DifficultyScorer.score(task_long_ctx)
+
+    assert long_score > short_score,
+           "Expected long_score (#{long_score}) > short_score (#{short_score})"
+  end
 end

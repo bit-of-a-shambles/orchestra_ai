@@ -54,8 +54,7 @@ module OrchestraAI
       def cost
         return nil unless usage[:input_tokens] && usage[:output_tokens] && model
 
-        provider_class = Providers::Registry.for_model(model)
-        info = provider_class::MODELS[model]
+        info = Providers::RubyLLMProvider::MODELS[model]
         return nil unless info
 
         input_cost = (usage[:input_tokens] / 1_000_000.0) * info[:input]

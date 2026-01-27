@@ -5,11 +5,15 @@ require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect(
   "orchestra_ai" => "OrchestraAI",
-  "openai" => "OpenAI"
+  "ruby_llm_provider" => "RubyLLMProvider"
 )
 loader.ignore("#{__dir__}/orchestra_ai/errors.rb")
 loader.ignore("#{__dir__}/orchestra_ai/version.rb")
 loader.ignore("#{__dir__}/orchestra_ai/configuration.rb")
+# Ignore old provider files (no longer used)
+loader.ignore("#{__dir__}/orchestra_ai/providers/anthropic.rb")
+loader.ignore("#{__dir__}/orchestra_ai/providers/openai.rb")
+loader.ignore("#{__dir__}/orchestra_ai/providers/google.rb")
 loader.setup
 
 require_relative "orchestra_ai/version"

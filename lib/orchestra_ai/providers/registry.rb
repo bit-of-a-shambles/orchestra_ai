@@ -3,55 +3,53 @@
 module OrchestraAI
   module Providers
     class Registry
-      PROVIDERS = {
-        anthropic: Anthropic,
-        openai: OpenAI,
-        google: Google
-      }.freeze
-
+      # All models now use the unified RubyLLM provider
       MODEL_TO_PROVIDER = {
-        # Anthropic models
-        "claude-opus-4-20250514" => :anthropic,
-        "claude-sonnet-4-20250514" => :anthropic,
-        "claude-3-5-haiku-latest" => :anthropic,
-        # OpenAI models
-        "gpt-4o" => :openai,
-        "gpt-4o-mini" => :openai,
-        "gpt-4-turbo" => :openai,
-        "o1" => :openai,
-        "o1-mini" => :openai,
-        # Google models
-        "gemini-2.5-pro-preview-05-06" => :google,
-        "gemini-2.0-flash" => :google,
-        "gemini-2.0-flash-lite" => :google
+        # Google Gemini models
+        'gemini-3-pro' => :google,
+        'gemini-3-flash' => :google,
+        'gemini-2.5-flash' => :google,
+        'gemini-2.5-flash-lite' => :google,
+        'gemini-2.5-pro' => :google,
+
+        # OpenAI GPT-5 family models
+        'gpt-5.2-codex' => :openai,
+        'gpt-5-mini' => :openai,
+        'gpt-5-nano' => :openai,
+        'gpt-4.1' => :openai,
+        'o4-mini' => :openai,
+
+        # Anthropic Claude 4.5 models
+        'claude-opus-4.5' => :anthropic,
+        'claude-sonnet-4.5' => :anthropic,
+        'claude-haiku-4.5' => :anthropic
       }.freeze
 
       class << self
-        def get(provider_name)
-          provider_class = PROVIDERS[provider_name.to_sym]
-          raise ProviderNotFoundError.new("Unknown provider: #{provider_name}") unless provider_class
-
-          provider_class
+        def get(_provider_name)
+          # All providers now use the unified RubyLLM provider
+          RubyLLMProvider
         end
 
         def for_model(model_name)
           provider_name = MODEL_TO_PROVIDER[model_name]
-          raise ProviderNotFoundError.new("Unknown model: #{model_name}") unless provider_name
+          raise ProviderNotFoundError, "Unknown model: #{model_name}" unless provider_name
 
-          get(provider_name)
+          RubyLLMProvider
         end
 
-        def create(provider_name, **options)
-          get(provider_name).new(**options)
+        def create(_provider_name, **options)
+          RubyLLMProvider.new(**options)
         end
 
         def create_for_model(model_name, **options)
-          provider_class = for_model(model_name)
-          provider_class.new(model: model_name, **options)
+          raise ProviderNotFoundError, "Unknown model: #{model_name}" unless MODEL_TO_PROVIDER[model_name]
+
+          RubyLLMProvider.new(model: model_name, **options)
         end
 
         def available_providers
-          PROVIDERS.keys.select do |provider|
+          %i[anthropic openai google].select do |provider|
             OrchestraAI.configuration.provider_available?(provider)
           end
         end

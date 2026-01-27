@@ -8,9 +8,9 @@ class ConfigurationTest < Minitest::Test
   def test_has_default_model_settings
     config = OrchestraAI::Configuration.new
 
-    assert_equal 'gemini-2.0-flash', config.models.architect.simple
-    assert_equal 'gpt-5-codex', config.models.architect.moderate
-    assert_equal 'claude-opus-4-20250514', config.models.architect.complex
+    assert_equal 'gemini-2.5-flash', config.models.architect.simple
+    assert_equal 'gpt-5.2-codex', config.models.architect.moderate
+    assert_equal 'claude-opus-4.5', config.models.architect.complex
   end
 
   def test_has_default_difficulty_thresholds
@@ -39,5 +39,29 @@ class ConfigurationTest < Minitest::Test
     config.anthropic_api_key = 'test-key'
 
     assert config.provider_available?(:anthropic)
+  end
+
+  def test_validate_raises_when_no_api_keys_configured
+    config = OrchestraAI::Configuration.new
+    config.anthropic_api_key = nil
+    config.openai_api_key = nil
+    config.google_api_key = nil
+
+    assert_raises(OrchestraAI::ConfigurationError) do
+      config.validate!
+    end
+  end
+
+  def test_validate_returns_true_when_valid
+    config = OrchestraAI::Configuration.new
+    config.anthropic_api_key = 'test-key'
+
+    assert config.validate!
+  end
+
+  def test_provider_available_returns_false_for_unknown_provider
+    config = OrchestraAI::Configuration.new
+
+    refute config.provider_available?(:unknown_provider)
   end
 end

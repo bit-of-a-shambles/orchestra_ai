@@ -1,5 +1,7 @@
 # OrchestraAI
 
+[![Coverage](https://img.shields.io/badge/coverage-96.95%25-brightgreen)](coverage/index.html)
+
 A simple AI agent orchestrator with role-based execution, parallel processing, task difficulty scoring, and cost optimisation.
 
 ## Why OrchestraAI?
@@ -68,9 +70,9 @@ The **Pipeline pattern** ensures quality through staged review, while **Parallel
               │                      │                      │
               ▼                      ▼                      ▼
       ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-      │ gemini-2.0   │      │  gpt-5-codex │      │ claude-opus-4│
+      │ gemini-2.5   │      │  gpt-5-codex │      │ claude-opus-4│
       │    flash     │      │              │      │              │
-      │  $0.10/1M    │      │   $2.00/1M   │      │  $15.00/1M   │
+      │  $0.10/1M    │      │   $2.50/1M   │      │  $5.00/1M    │
       └──────────────┘      └──────────────┘      └──────────────┘
 
 
@@ -383,9 +385,9 @@ result = router.execute(task)
 
 | Role | Simple (< 0.33) | Moderate (0.33-0.66) | Complex (> 0.66) |
 |------|-----------------|----------------------|------------------|
-| Architect | gemini-2.0-flash | gpt-5-codex | claude-opus-4 |
-| Implementer | gemini-2.0-flash | gemini-2.0-flash | gpt-5-codex |
-| Reviewer | gemini-2.0-flash | gpt-5-codex | claude-opus-4 |
+| Architect | gemini-2.5-flash | gpt-5-codex | claude-opus-4 |
+| Implementer | gemini-2.5-flash | gemini-2.5-flash | gpt-5-codex |
+| Reviewer | gemini-2.5-flash | gpt-5-codex | claude-opus-4 |
 
 ## Testing
 

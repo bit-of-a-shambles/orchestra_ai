@@ -61,4 +61,38 @@ class DefinitionTest < Minitest::Test
     assert_equal 0.5, copy.difficulty
     refute_equal original.id, copy.id
   end
+
+  def test_with_metadata_adds_metadata
+    task = OrchestraAI::Tasks::Definition.new(description: 'Test')
+    task.with_metadata(:priority, 'high')
+
+    assert_equal 'high', task.metadata[:priority]
+  end
+
+  def test_with_metadata_returns_self_for_chaining
+    task = OrchestraAI::Tasks::Definition.new(description: 'Test')
+    result = task.with_metadata(:key, 'value')
+
+    assert_same task, result
+  end
+
+  def test_to_h_returns_hash_representation
+    task = OrchestraAI::Tasks::Definition.new(
+      description: 'Test task',
+      difficulty: 0.5,
+      context: ['ctx1']
+    )
+    task.assigned_model = 'gpt-4.1'
+    task.assigned_agent = :implementer
+
+    hash = task.to_h
+
+    assert_equal task.id, hash[:id]
+    assert_equal 'Test task', hash[:description]
+    assert_equal 0.5, hash[:difficulty]
+    assert_equal ['ctx1'], hash[:context]
+    assert_equal 'gpt-4.1', hash[:assigned_model]
+    assert_equal :implementer, hash[:assigned_agent]
+    assert_instance_of Time, hash[:created_at]
+  end
 end
