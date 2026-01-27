@@ -121,4 +121,24 @@ class CLITest < Minitest::Test
     assert_match(/Fallback strategy/, content,
                  'Budget command should show fallback strategy')
   end
+
+  def test_cli_does_not_use_configuration_dot_config
+    content = File.read(@exe_path)
+    refute_match(/OrchestraAI\.configuration\.config/, content,
+                 'CLI should NOT use .configuration.config (method does not exist)')
+  end
+
+  def test_cli_config_command_uses_correct_api
+    content = File.read(@exe_path)
+    # Should use OrchestraAI.configuration directly
+    assert_match(/cfg = OrchestraAI\.configuration/, content,
+                 'Config command should use OrchestraAI.configuration directly')
+  end
+
+  def test_cli_budget_command_uses_correct_api
+    content = File.read(@exe_path)
+    # Should use OrchestraAI.configuration.budget
+    assert_match(/budget_config = OrchestraAI\.configuration\.budget/, content,
+                 'Budget command should use OrchestraAI.configuration.budget')
+  end
 end
