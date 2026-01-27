@@ -286,6 +286,9 @@ orchestra execute --stream "Explain microservices architecture"
 # Score task difficulty (see which model would be used)
 orchestra score "Implement distributed locking"
 
+# Show budget status and spending
+orchestra budget
+
 # List available models with pricing
 orchestra models
 

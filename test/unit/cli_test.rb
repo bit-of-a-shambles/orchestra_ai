@@ -99,4 +99,26 @@ class CLITest < Minitest::Test
     assert_match(/when :reviewer then OrchestraAI\.reviewer/, content,
                  'CLI should handle reviewer agent')
   end
+
+  def test_cli_has_budget_command
+    content = File.read(@exe_path)
+    assert_match(/desc "budget"/, content,
+                 'CLI should have budget command')
+  end
+
+  def test_cli_budget_shows_provider_limits
+    content = File.read(@exe_path)
+    assert_match(/Per-Provider Limits/, content,
+                 'Budget command should show per-provider limits')
+  end
+
+  def test_cli_budget_shows_configuration
+    content = File.read(@exe_path)
+    assert_match(/Alert threshold/, content,
+                 'Budget command should show alert threshold')
+    assert_match(/Enforce limits/, content,
+                 'Budget command should show enforce_limits setting')
+    assert_match(/Fallback strategy/, content,
+                 'Budget command should show fallback strategy')
+  end
 end

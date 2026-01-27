@@ -64,21 +64,21 @@ module OrchestraAI
 
     desc "config", "Show current configuration"
     def config
-      config = OrchestraAI.configuration.config
+      cfg = OrchestraAI.configuration
 
       say "Configuration:", :green
       puts
 
       say "API Keys:", :cyan
-      say "  Anthropic: #{config.anthropic_api_key ? '[configured]' : '[not set]'}"
-      say "  OpenAI: #{config.openai_api_key ? '[configured]' : '[not set]'}"
-      say "  Google: #{config.google_api_key ? '[configured]' : '[not set]'}"
+      say "  Anthropic: #{cfg.anthropic_api_key ? '[configured]' : '[not set]'}"
+      say "  OpenAI: #{cfg.openai_api_key ? '[configured]' : '[not set]'}"
+      say "  Google: #{cfg.google_api_key ? '[configured]' : '[not set]'}"
       puts
 
       say "Model Defaults:", :cyan
       %i[architect implementer reviewer].each do |role|
         say "  #{role.to_s.capitalize}:"
-        model_config = config.models.send(role)
+        model_config = cfg.models.send(role)
         say "    Simple: #{model_config.simple}"
         say "    Moderate: #{model_config.moderate}"
         say "    Complex: #{model_config.complex}"
@@ -86,9 +86,9 @@ module OrchestraAI
       puts
 
       say "Difficulty Thresholds:", :cyan
-      say "  Simple: < #{config.difficulty.simple_threshold}"
-      say "  Moderate: #{config.difficulty.simple_threshold} - #{config.difficulty.moderate_threshold}"
-      say "  Complex: >= #{config.difficulty.moderate_threshold}"
+      say "  Simple: < #{cfg.difficulty.simple_threshold}"
+      say "  Moderate: #{cfg.difficulty.simple_threshold} - #{cfg.difficulty.moderate_threshold}"
+      say "  Complex: >= #{cfg.difficulty.moderate_threshold}"
     end
 
     desc "score DESCRIPTION", "Score a task's difficulty"
@@ -108,6 +108,48 @@ module OrchestraAI
         Tasks::Assigner.assign(task.dup_with, agent: agent)
         say "  #{agent.to_s.capitalize}: #{task.assigned_model}"
       end
+    end
+
+    desc "budget", "Show budget status and spending"
+    def budget
+      configure_from_env
+      budget_config = OrchestraAI.configuration.budget
+
+      say "Budget Status:", :green
+      puts
+
+      say "Configuration:", :cyan
+      say "  Alert threshold: #{(budget_config.alert_threshold * 100).to_i}%"
+      say "  Enforce limits: #{budget_config.enforce_limits}"
+      say "  Fallback strategy: #{budget_config.fallback_strategy}"
+      puts
+
+      say "Per-Provider Limits:", :cyan
+      budget_obj = budget_config.to_budget
+
+      %i[anthropic openai google].each do |provider|
+        limit = budget_config.limits[provider] || Float::INFINITY
+        spent = budget_obj.spent[provider]
+        remaining = budget_obj.remaining(provider)
+        percentage = limit.finite? ? ((spent / limit) * 100).round(1) : 0
+
+        if limit.finite?
+          status = if budget_obj.exceeded?(provider)
+                     set_color("[EXCEEDED]", :red)
+                   elsif budget_obj.at_alert_threshold?(provider)
+                     set_color("[WARNING]", :yellow)
+                   else
+                     set_color("[OK]", :green)
+                   end
+
+          say "  #{provider.to_s.capitalize}: $#{sprintf('%.2f', spent)} / $#{sprintf('%.2f', limit)} (#{percentage}%) #{status}"
+        else
+          say "  #{provider.to_s.capitalize}: $#{sprintf('%.2f', spent)} / unlimited"
+        end
+      end
+
+      puts
+      say "Total spent: $#{sprintf('%.4f', budget_obj.total_spent)}", :cyan
     end
 
     desc "version", "Show version"
