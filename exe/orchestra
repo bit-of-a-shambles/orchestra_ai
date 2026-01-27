@@ -1,0 +1,158 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "orchestra_ai"
+require "thor"
+
+module OrchestraAI
+  class CLI < Thor
+    desc "execute DESCRIPTION", "Execute a task with AI agents"
+    option :pattern, type: :string, default: "auto",
+                     desc: "Execution pattern: auto, pipeline, parallel"
+    option :agent, type: :string,
+                   desc: "Specific agent: architect, implementer, reviewer"
+    option :model, type: :string,
+                   desc: "Specific model to use"
+    option :stream, type: :boolean, default: false,
+                    desc: "Stream output"
+    def execute(description)
+      configure_from_env
+
+      task = Tasks::Definition.new(description: description)
+
+      if options[:agent]
+        agent = get_agent(options[:agent])
+        if options[:stream]
+          agent.stream(task) { |chunk| print chunk }
+          puts
+        else
+          result = agent.execute(task)
+          output_result(result)
+        end
+      else
+        result = OrchestraAI.execute(task, pattern: options[:pattern].to_sym)
+        output_result(result)
+      end
+    rescue StandardError => e
+      say "Error: #{e.message}", :red
+      exit 1
+    end
+
+    desc "models", "List available models with pricing"
+    def models
+      say "Available Models:", :green
+      puts
+
+      Providers::Registry::MODEL_TO_PROVIDER.group_by { |_, p| p }.each do |provider, models|
+        say "#{provider.to_s.capitalize}:", :cyan
+        models.each do |model, _|
+          provider_class = Providers::Registry.get(provider)
+          info = provider_class::MODELS[model]
+          if info
+            available = OrchestraAI.configuration.provider_available?(provider)
+            status = available ? "[available]" : "[not configured]"
+            say "  #{model} #{status}"
+            say "    Input: $#{info[:input]}/1M tokens, Output: $#{info[:output]}/1M tokens"
+            say "    Context: #{info[:context].to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse} tokens"
+          else
+            say "  #{model}"
+          end
+        end
+        puts
+      end
+    end
+
+    desc "config", "Show current configuration"
+    def config
+      config = OrchestraAI.configuration.config
+
+      say "Configuration:", :green
+      puts
+
+      say "API Keys:", :cyan
+      say "  Anthropic: #{config.anthropic_api_key ? '[configured]' : '[not set]'}"
+      say "  OpenAI: #{config.openai_api_key ? '[configured]' : '[not set]'}"
+      say "  Google: #{config.google_api_key ? '[configured]' : '[not set]'}"
+      puts
+
+      say "Model Defaults:", :cyan
+      %i[architect implementer reviewer].each do |role|
+        say "  #{role.to_s.capitalize}:"
+        model_config = config.models.send(role)
+        say "    Simple: #{model_config.simple}"
+        say "    Moderate: #{model_config.moderate}"
+        say "    Complex: #{model_config.complex}"
+      end
+      puts
+
+      say "Difficulty Thresholds:", :cyan
+      say "  Simple: < #{config.difficulty.simple_threshold}"
+      say "  Moderate: #{config.difficulty.simple_threshold} - #{config.difficulty.moderate_threshold}"
+      say "  Complex: >= #{config.difficulty.moderate_threshold}"
+    end
+
+    desc "score DESCRIPTION", "Score a task's difficulty"
+    def score(description)
+      task = Tasks::Definition.new(description: description)
+      score = Tasks::DifficultyScorer.score(task)
+      tier = Tasks::DifficultyScorer.classify(task)
+
+      say "Task: #{description}", :cyan
+      say "Score: #{score.round(3)}"
+      say "Classification: #{tier}"
+
+      # Show what model would be used for each agent
+      puts
+      say "Model Selection:", :green
+      %i[architect implementer reviewer].each do |agent|
+        Tasks::Assigner.assign(task.dup_with, agent: agent)
+        say "  #{agent.to_s.capitalize}: #{task.assigned_model}"
+      end
+    end
+
+    desc "version", "Show version"
+    def version
+      say "OrchestraAI #{OrchestraAI::VERSION}"
+    end
+
+    private
+
+    def configure_from_env
+      OrchestraAI.configure do |c|
+        # Configuration is loaded from env vars by default
+      end
+    rescue ConfigurationError
+      say "Warning: No API keys configured. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY", :yellow
+    end
+
+    def get_agent(name)
+      case name.to_sym
+      when :architect then OrchestraAI.architect
+      when :implementer then OrchestraAI.implementer
+      when :reviewer then OrchestraAI.reviewer
+      else
+        raise ArgumentError, "Unknown agent: #{name}"
+      end
+    end
+
+    def output_result(result)
+      if result.respond_to?(:success?) && result.success?
+        say result.content
+        puts
+        say "---", :cyan
+        say "Agent: #{result.agent}" if result.respond_to?(:agent)
+        say "Model: #{result.model}" if result.respond_to?(:model)
+        if result.respond_to?(:cost) && result.cost
+          say "Cost: $#{result.cost[:total].round(6)}"
+        end
+      elsif result.respond_to?(:failed?) && result.failed?
+        say "Task failed: #{result.error&.message}", :red
+      else
+        # Pipeline or parallel result
+        say result.content if result.respond_to?(:content)
+      end
+    end
+  end
+end
+
+OrchestraAI::CLI.start(ARGV)

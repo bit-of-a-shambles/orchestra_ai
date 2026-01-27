@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
         f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile])
     end
   end
-  spec.bindir = 'bin'
+  spec.bindir = 'exe'
   spec.executables = ['orchestra']
   spec.require_paths = ['lib']
 
