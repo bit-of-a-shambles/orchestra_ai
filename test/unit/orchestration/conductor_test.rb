@@ -73,11 +73,27 @@ class ConductorTest < Minitest::Test
     end
   end
 
-  def test_execute_raises_for_parallel_pattern
-    task = OrchestraAI::Tasks::Definition.new(description: 'Test')
+  def test_execute_with_parallel_pattern_for_single_task_falls_back_to_auto
+    # Single task with parallel pattern should fall back to auto (not raise error)
+    task = OrchestraAI::Tasks::Definition.new(description: 'Test task', difficulty: 0.1)
 
-    assert_raises(ArgumentError) do
-      @conductor.execute(task, pattern: :parallel)
+    OrchestraAI::Providers::Registry.stub(:create_for_model, @mock_provider) do
+      result = @conductor.execute(task, pattern: :parallel)
+
+      # Should execute successfully using auto pattern
+      assert result.success?
+    end
+  end
+
+  def test_execute_with_sequential_pattern_for_single_task_falls_back_to_auto
+    # Single task with sequential pattern should fall back to auto
+    task = OrchestraAI::Tasks::Definition.new(description: 'Test task', difficulty: 0.1)
+
+    OrchestraAI::Providers::Registry.stub(:create_for_model, @mock_provider) do
+      result = @conductor.execute(task, pattern: :sequential)
+
+      # Should execute successfully using auto pattern
+      assert result.success?
     end
   end
 

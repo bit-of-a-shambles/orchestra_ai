@@ -35,9 +35,14 @@ module OrchestraAI
                  when :pipeline
                    pipeline_execute(task, **options)
                  when :parallel
-                   raise ArgumentError, 'Use #parallel for parallel execution'
+                   # For single task, parallel doesn't make sense - use auto instead
+                   auto_execute(task, **options)
+                 when :sequential
+                   # For single task, sequential doesn't make sense - use auto instead
+                   auto_execute(task, **options)
                  else
-                   raise ArgumentError, "Unknown pattern: #{pattern}"
+                   raise ArgumentError,
+                         "Unknown pattern: #{pattern}. Valid patterns: auto, pipeline, parallel, sequential"
                  end
 
         # Track costs after execution

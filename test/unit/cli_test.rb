@@ -2,6 +2,16 @@
 
 require 'test_helper'
 require 'open3'
+require 'stringio'
+require 'ostruct'
+
+# Load the CLI class from exe/orchestra
+exe_path = File.expand_path('../../exe/orchestra', __dir__)
+# Read file and eval to load classes without running CLI.start
+cli_content = File.read(exe_path)
+# Remove the CLI.start call at the end
+cli_content = cli_content.gsub(/^OrchestraAI::CLI\.start\(ARGV\).*$/, '')
+eval(cli_content, binding, exe_path) # rubocop:disable Security/Eval
 
 class CLITest < Minitest::Test
   include OrchestraAITestHelper
@@ -9,6 +19,24 @@ class CLITest < Minitest::Test
   def setup
     super
     @exe_path = File.expand_path('../../exe/orchestra', __dir__)
+    @original_stdout = $stdout
+    @original_stderr = $stderr
+    OrchestraAI.reset!
+  end
+
+  def teardown
+    $stdout = @original_stdout
+    $stderr = @original_stderr
+  end
+
+  def capture_output
+    $stdout = StringIO.new
+    $stderr = StringIO.new
+    yield
+    { stdout: $stdout.string, stderr: $stderr.string }
+  ensure
+    $stdout = @original_stdout
+    $stderr = @original_stderr
   end
 
   def test_cli_file_exists
@@ -28,33 +56,231 @@ class CLITest < Minitest::Test
                  'CLI should define OrchestraAI::CLI class inheriting from Thor')
   end
 
-  def test_cli_has_execute_command
+  # -- Runtime tests for version command --
+
+  def test_version_command_output
+    output = capture_output { OrchestraAI::CLI.new.version }
+    assert_match(/OrchestraAI/, output[:stdout])
+    assert_match(/\d+\.\d+\.\d+/, output[:stdout])
+  end
+
+  # -- Runtime tests for config command --
+
+  def test_config_command_shows_api_keys_section
+    output = capture_output { OrchestraAI::CLI.new.config }
+    assert_match(/API Keys:/, output[:stdout])
+    assert_match(/Anthropic:/, output[:stdout])
+    assert_match(/OpenAI:/, output[:stdout])
+    assert_match(/Google:/, output[:stdout])
+  end
+
+  def test_config_command_shows_admin_keys_section
+    output = capture_output { OrchestraAI::CLI.new.config }
+    assert_match(/Admin Keys/, output[:stdout])
+  end
+
+  def test_config_command_shows_model_defaults
+    output = capture_output { OrchestraAI::CLI.new.config }
+    assert_match(/Model Defaults:/, output[:stdout])
+    assert_match(/Architect:/, output[:stdout])
+    assert_match(/Implementer:/, output[:stdout])
+    assert_match(/Reviewer:/, output[:stdout])
+  end
+
+  def test_config_command_shows_difficulty_thresholds
+    output = capture_output { OrchestraAI::CLI.new.config }
+    assert_match(/Difficulty Thresholds:/, output[:stdout])
+  end
+
+  # -- Runtime tests for models command --
+
+  def test_models_command_shows_available_models
+    output = capture_output { OrchestraAI::CLI.new.models }
+    assert_match(/Available Models:/, output[:stdout])
+  end
+
+  def test_models_command_shows_pricing_info
+    output = capture_output { OrchestraAI::CLI.new.models }
+    assert_match(/Input:/, output[:stdout])
+    assert_match(/Output:/, output[:stdout])
+    assert_match(%r{/1M tokens}, output[:stdout])
+  end
+
+  # -- Runtime tests for score command --
+
+  def test_score_command_output_for_simple_task
+    output = capture_output { OrchestraAI::CLI.new.score('fix typo') }
+    assert_match(/Task:/, output[:stdout])
+    assert_match(/Score:/, output[:stdout])
+    assert_match(/Classification:/, output[:stdout])
+    assert_match(/Model Selection:/, output[:stdout])
+  end
+
+  def test_score_command_shows_all_agents
+    output = capture_output { OrchestraAI::CLI.new.score('test task') }
+    assert_match(/Architect:/, output[:stdout])
+    assert_match(/Implementer:/, output[:stdout])
+    assert_match(/Reviewer:/, output[:stdout])
+  end
+
+  # -- Runtime tests for budget command --
+
+  def test_budget_command_shows_status
+    output = capture_output { OrchestraAI::CLI.new.invoke(:budget, [], {}) }
+    assert_match(/Budget Status:/, output[:stdout])
+  end
+
+  def test_budget_command_shows_configuration
+    output = capture_output { OrchestraAI::CLI.new.invoke(:budget, [], {}) }
+    assert_match(/Alert threshold:/, output[:stdout])
+    assert_match(/Enforce limits:/, output[:stdout])
+    assert_match(/Fallback strategy:/, output[:stdout])
+  end
+
+  def test_budget_command_shows_per_provider_limits
+    output = capture_output { OrchestraAI::CLI.new.invoke(:budget, [], {}) }
+    assert_match(/Per-Provider Limits:/, output[:stdout])
+    assert_match(/Anthropic:/, output[:stdout])
+    assert_match(/Openai:/, output[:stdout])
+    assert_match(/Google:/, output[:stdout])
+  end
+
+  def test_budget_command_shows_total_spent
+    output = capture_output { OrchestraAI::CLI.new.invoke(:budget, [], {}) }
+    assert_match(/Total spent:/, output[:stdout])
+  end
+
+  # -- CLI helper method tests --
+
+  def test_get_agent_returns_architect
+    cli = OrchestraAI::CLI.new
+    agent = cli.send(:get_agent, 'architect')
+    assert_instance_of OrchestraAI::Agents::Architect, agent
+  end
+
+  def test_get_agent_returns_implementer
+    cli = OrchestraAI::CLI.new
+    agent = cli.send(:get_agent, 'implementer')
+    assert_instance_of OrchestraAI::Agents::Implementer, agent
+  end
+
+  def test_get_agent_returns_reviewer
+    cli = OrchestraAI::CLI.new
+    agent = cli.send(:get_agent, 'reviewer')
+    assert_instance_of OrchestraAI::Agents::Reviewer, agent
+  end
+
+  def test_get_agent_raises_for_unknown_agent
+    cli = OrchestraAI::CLI.new
+    assert_raises(ArgumentError) do
+      cli.send(:get_agent, 'unknown')
+    end
+  end
+
+  def test_format_number_formats_thousands
+    cli = OrchestraAI::CLI.new
+    assert_equal '1,000', cli.send(:format_number, 1000)
+    assert_equal '1,000,000', cli.send(:format_number, 1_000_000)
+    assert_equal '123', cli.send(:format_number, 123)
+  end
+
+  # -- output_result tests --
+
+  def test_output_result_with_successful_pipeline_result
+    cli = OrchestraAI::CLI.new
+
+    # Create a mock stage result
+    stage_result = OpenStruct.new(
+      content: 'Test content',
+      cost: { input: 0.001, output: 0.002, total: 0.003 }
+    )
+
+    result = OrchestraAI::Orchestration::Patterns::PipelineResult.new(
+      results: { plan: stage_result },
+      completed_stages: [:plan],
+      failed_stage: nil,
+      success: true
+    )
+
+    output = capture_output { cli.send(:output_result, result) }
+    assert_match(/Stages:.*plan/i, output[:stdout])
+  end
+
+  def test_output_result_with_failed_pipeline_result
+    cli = OrchestraAI::CLI.new
+
+    result = OrchestraAI::Orchestration::Patterns::PipelineResult.new(
+      results: {},
+      completed_stages: [],
+      failed_stage: :plan,
+      success: false
+    )
+
+    output = capture_output { cli.send(:output_result, result) }
+    assert_match(/failed.*plan/i, output[:stdout])
+  end
+
+  # -- Thor command registration tests --
+
+  def test_cli_has_all_required_commands
+    commands = OrchestraAI::CLI.commands.keys
+    assert_includes commands, 'execute'
+    assert_includes commands, 'models'
+    assert_includes commands, 'config'
+    assert_includes commands, 'score'
+    assert_includes commands, 'budget'
+    assert_includes commands, 'usage'
+    assert_includes commands, 'version'
+  end
+
+  def test_execute_command_has_correct_options
+    cmd = OrchestraAI::CLI.commands['execute']
+    assert cmd.options.key?(:pattern)
+    assert cmd.options.key?(:agent)
+    assert cmd.options.key?(:stream)
+    assert_equal 'auto', cmd.options[:pattern].default
+    assert_equal false, cmd.options[:stream].default
+  end
+
+  def test_budget_command_has_fetch_option
+    cmd = OrchestraAI::CLI.commands['budget']
+    assert cmd.options.key?(:fetch)
+    assert_equal false, cmd.options[:fetch].default
+  end
+
+  def test_cli_exits_on_failure
+    assert OrchestraAI::CLI.exit_on_failure?
+  end
+
+  # -- File content tests (existing tests) --
+
+  def test_cli_has_execute_command_in_file
     content = File.read(@exe_path)
-    assert_match(/desc "execute DESCRIPTION"/, content,
+    assert_match(/desc ['"]execute DESCRIPTION['"]/, content,
                  'CLI should have execute command')
   end
 
-  def test_cli_has_models_command
+  def test_cli_has_models_command_in_file
     content = File.read(@exe_path)
-    assert_match(/desc "models"/, content,
+    assert_match(/desc ['"]models['"]/, content,
                  'CLI should have models command')
   end
 
-  def test_cli_has_config_command
+  def test_cli_has_config_command_in_file
     content = File.read(@exe_path)
-    assert_match(/desc "config"/, content,
+    assert_match(/desc ['"]config['"]/, content,
                  'CLI should have config command')
   end
 
-  def test_cli_has_score_command
+  def test_cli_has_score_command_in_file
     content = File.read(@exe_path)
-    assert_match(/desc "score DESCRIPTION"/, content,
+    assert_match(/desc ['"]score DESCRIPTION['"]/, content,
                  'CLI should have score command')
   end
 
-  def test_cli_has_version_command
+  def test_cli_has_version_command_in_file
     content = File.read(@exe_path)
-    assert_match(/desc "version"/, content,
+    assert_match(/desc ['"]version['"]/, content,
                  'CLI should have version command')
   end
 
@@ -66,7 +292,7 @@ class CLITest < Minitest::Test
 
   def test_cli_has_pattern_option_for_execute
     content = File.read(@exe_path)
-    assert_match(/option :pattern.*type: :string.*default: "auto"/, content,
+    assert_match(/option :pattern.*type: :string.*default: ['"]auto['"]/, content,
                  'Execute command should have pattern option with auto default')
   end
 
@@ -100,9 +326,9 @@ class CLITest < Minitest::Test
                  'CLI should handle reviewer agent')
   end
 
-  def test_cli_has_budget_command
+  def test_cli_has_budget_command_in_file
     content = File.read(@exe_path)
-    assert_match(/desc "budget"/, content,
+    assert_match(/desc ['"]budget['"]/, content,
                  'CLI should have budget command')
   end
 

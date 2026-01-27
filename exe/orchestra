@@ -202,23 +202,39 @@ module OrchestraAI
     end
 
     def output_result(result)
-      if result.respond_to?(:success?) && result.success?
+      # Handle PipelineResult
+      if result.is_a?(Orchestration::Patterns::PipelineResult)
+        if result.success?
+          say result.content
+          puts
+          say '---', :cyan
+          say "Stages: #{result.completed_stages.join(' -> ')}"
+          say "Total cost: $#{result.total_cost[:total].round(6)}" if result.total_cost
+        else
+          say "Pipeline failed at stage: #{result.failed_stage}", :red
+          say "Error: #{result.final.error.message}", :red if result.final&.respond_to?(:error) && result.final.error
+        end
+      # Handle regular TaskResult
+      elsif result.respond_to?(:success?) && result.success?
         say result.content
         puts
         say '---', :cyan
-        say "Agent: #{result.agent}" if result.respond_to?(:agent)
-        say "Model: #{result.model}" if result.respond_to?(:model)
+        say "Agent: #{result.agent}" if result.respond_to?(:agent) && result.agent
+        say "Model: #{result.model}" if result.respond_to?(:model) && result.model
         say "Cost: $#{result.cost[:total].round(6)}" if result.respond_to?(:cost) && result.cost
       elsif result.respond_to?(:failed?) && result.failed?
         say "Task failed: #{result.error&.message}", :red
       elsif result.respond_to?(:content)
-        # Pipeline or parallel result
+        # Fallback for other result types
         say result.content
       end
     end
 
     def fetch_provider_billing
       cfg = OrchestraAI.configuration
+
+      # Set SSL verification from configuration
+      Costs::BillingFetcher.ssl_verify = cfg.ssl_verify
 
       api_keys = {
         openai: cfg.openai_api_key,

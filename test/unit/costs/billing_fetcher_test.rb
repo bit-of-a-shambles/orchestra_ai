@@ -80,6 +80,12 @@ module OrchestraAI
       end
 
       def test_fetch_all_handles_missing_api_keys
+        # Ensure no ENV keys are set that could provide fallback
+        original_openai_admin = ENV['OPENAI_ADMIN_KEY']
+        original_anthropic_admin = ENV['ANTHROPIC_ADMIN_KEY']
+        ENV.delete('OPENAI_ADMIN_KEY')
+        ENV.delete('ANTHROPIC_ADMIN_KEY')
+
         results = BillingFetcher.fetch_all({})
 
         results.each do |provider, result|
@@ -87,6 +93,9 @@ module OrchestraAI
           # All providers should fail without API keys
           assert result.error_message, "Expected #{provider} to have an error message"
         end
+      ensure
+        ENV['OPENAI_ADMIN_KEY'] = original_openai_admin if original_openai_admin
+        ENV['ANTHROPIC_ADMIN_KEY'] = original_anthropic_admin if original_anthropic_admin
       end
 
       # -- OpenAI fetch tests --

@@ -220,6 +220,9 @@ module OrchestraAI
     def fetch_provider_billing
       cfg = OrchestraAI.configuration
 
+      # Set SSL verification from configuration
+      Costs::BillingFetcher.ssl_verify = cfg.ssl_verify
+
       api_keys = {
         openai: cfg.openai_api_key,
         openai_admin: cfg.openai_admin_key,

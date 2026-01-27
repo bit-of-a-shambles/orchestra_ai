@@ -43,6 +43,9 @@ module OrchestraAI
       end
 
       class << self
+        # SSL verification setting - can be disabled for environments with certificate issues
+        attr_accessor :ssl_verify
+
         def fetch_all(api_keys = {})
           PROVIDERS.each_with_object({}) do |provider, results|
             api_key = api_keys[provider] || api_keys[provider.to_s]
@@ -307,14 +310,15 @@ module OrchestraAI
           )
         end
 
-        def make_request(uri, api_key)
+        def make_request(uri, api_key, ssl_verify: true)
           http = Net::HTTP.new(uri.host, uri.port)
           http.use_ssl = true
           http.open_timeout = 10
           http.read_timeout = 30
-          # Some environments have certificate verification issues
-          # Users can set ORCHESTRA_SSL_VERIFY=false to disable (not recommended for production)
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if ENV['ORCHESTRA_SSL_VERIFY'] == 'false'
+          # Disable SSL verification if configured (for environments with certificate issues)
+          # Check class-level setting first, then parameter
+          verify = self.ssl_verify.nil? ? ssl_verify : self.ssl_verify
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE unless verify
 
           request = Net::HTTP::Get.new(uri)
           request['Authorization'] = "Bearer #{api_key}"
@@ -323,12 +327,13 @@ module OrchestraAI
           http.request(request)
         end
 
-        def make_anthropic_request(uri, api_key)
+        def make_anthropic_request(uri, api_key, ssl_verify: true)
           http = Net::HTTP.new(uri.host, uri.port)
           http.use_ssl = true
           http.open_timeout = 10
           http.read_timeout = 30
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if ENV['ORCHESTRA_SSL_VERIFY'] == 'false'
+          verify = self.ssl_verify.nil? ? ssl_verify : self.ssl_verify
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE unless verify
 
           request = Net::HTTP::Get.new(uri)
           # Anthropic Admin API uses x-api-key header (not Bearer token)

@@ -8,6 +8,9 @@ module OrchestraAI
     # Admin API Keys (for billing/usage APIs)
     attr_accessor :anthropic_admin_key, :openai_admin_key
 
+    # SSL verification (set to false if you have certificate issues)
+    attr_accessor :ssl_verify
+
     # Logging
     attr_accessor :logger, :log_level
 
@@ -20,6 +23,7 @@ module OrchestraAI
       @google_api_key = ENV.fetch('GOOGLE_API_KEY', nil)
       @anthropic_admin_key = ENV.fetch('ANTHROPIC_ADMIN_KEY', nil)
       @openai_admin_key = ENV.fetch('OPENAI_ADMIN_KEY', nil)
+      @ssl_verify = ENV.fetch('ORCHESTRA_SSL_VERIFY', 'true') != 'false'
       @logger = nil
       @log_level = :info
 
