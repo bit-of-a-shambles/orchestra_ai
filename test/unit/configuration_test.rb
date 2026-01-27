@@ -1,0 +1,43 @@
+# frozen_string_literal: true
+
+require 'test_helper'
+
+class ConfigurationTest < Minitest::Test
+  include OrchestraAITestHelper
+
+  def test_has_default_model_settings
+    config = OrchestraAI::Configuration.new
+
+    assert_equal 'gemini-2.0-flash', config.models.architect.simple
+    assert_equal 'gpt-5-codex', config.models.architect.moderate
+    assert_equal 'claude-opus-4-20250514', config.models.architect.complex
+  end
+
+  def test_has_default_difficulty_thresholds
+    config = OrchestraAI::Configuration.new
+
+    assert_equal 0.33, config.difficulty.simple_threshold
+    assert_equal 0.66, config.difficulty.moderate_threshold
+  end
+
+  def test_has_default_retry_settings
+    config = OrchestraAI::Configuration.new
+
+    assert_equal 3, config.retry_config.max_attempts
+    assert_equal 1.0, config.retry_config.base_delay
+  end
+
+  def test_provider_available_returns_false_when_no_api_key
+    config = OrchestraAI::Configuration.new
+    config.anthropic_api_key = nil
+
+    refute config.provider_available?(:anthropic)
+  end
+
+  def test_provider_available_returns_true_when_api_key_set
+    config = OrchestraAI::Configuration.new
+    config.anthropic_api_key = 'test-key'
+
+    assert config.provider_available?(:anthropic)
+  end
+end

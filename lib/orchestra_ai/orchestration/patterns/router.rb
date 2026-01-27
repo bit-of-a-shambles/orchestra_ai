@@ -85,7 +85,7 @@ module OrchestraAI
               OrchestraAI.architect.execute(task, **opts.merge(options))
             end
 
-            r.route_by_keywords("review", "check", "audit", "analyze") do |task, **opts|
+            r.route_by_keywords("review", "check", "audit", "analyse") do |task, **opts|
               OrchestraAI.reviewer.execute(task, **opts.merge(options))
             end
 

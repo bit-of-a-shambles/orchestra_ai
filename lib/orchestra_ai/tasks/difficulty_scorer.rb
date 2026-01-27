@@ -8,7 +8,7 @@ module OrchestraAI
         high: %w[
           architecture design system distributed scalable
           security authentication authorization encryption
-          optimization performance concurrent parallel async
+          optimisation performance concurrent parallel async
           migrate refactor legacy integration
           machine learning neural network ai model training
           real-time streaming websocket

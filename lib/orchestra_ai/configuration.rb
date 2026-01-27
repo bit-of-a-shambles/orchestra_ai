@@ -12,9 +12,9 @@ module OrchestraAI
     attr_reader :models, :difficulty, :retry_config, :circuit_breaker, :parallel
 
     def initialize
-      @anthropic_api_key = ENV.fetch("ANTHROPIC_API_KEY", nil)
-      @openai_api_key = ENV.fetch("OPENAI_API_KEY", nil)
-      @google_api_key = ENV.fetch("GOOGLE_API_KEY", nil)
+      @anthropic_api_key = ENV.fetch('ANTHROPIC_API_KEY', nil)
+      @openai_api_key = ENV.fetch('OPENAI_API_KEY', nil)
+      @google_api_key = ENV.fetch('GOOGLE_API_KEY', nil)
       @logger = nil
       @log_level = :info
 
@@ -29,10 +29,10 @@ module OrchestraAI
       errors = []
 
       if anthropic_api_key.nil? && openai_api_key.nil? && google_api_key.nil?
-        errors << "At least one API key must be configured"
+        errors << 'At least one API key must be configured'
       end
 
-      raise ConfigurationError, errors.join(", ") unless errors.empty?
+      raise ConfigurationError, errors.join(', ') unless errors.empty?
 
       true
     end
@@ -52,19 +52,19 @@ module OrchestraAI
 
       def initialize
         @architect = RoleModelsConfig.new(
-          simple: "claude-3-5-haiku-latest",
-          moderate: "claude-sonnet-4-20250514",
-          complex: "claude-opus-4-20250514"
+          simple: 'gemini-2.0-flash',
+          moderate: 'gpt-5-codex',
+          complex: 'claude-opus-4-20250514'
         )
         @implementer = RoleModelsConfig.new(
-          simple: "gemini-2.0-flash",
-          moderate: "gemini-2.5-pro-preview-05-06",
-          complex: "claude-sonnet-4-20250514"
+          simple: 'gemini-2.0-flash',
+          moderate: 'gemini-2.0-flash',
+          complex: 'gpt-5-codex'
         )
         @reviewer = RoleModelsConfig.new(
-          simple: "gpt-4o-mini",
-          moderate: "gpt-4o",
-          complex: "claude-opus-4-20250514"
+          simple: 'gemini-2.0-flash',
+          moderate: 'gpt-5-codex',
+          complex: 'claude-opus-4-20250514'
         )
       end
     end

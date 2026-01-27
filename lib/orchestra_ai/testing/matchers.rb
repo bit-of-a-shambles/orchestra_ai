@@ -2,8 +2,75 @@
 
 module OrchestraAI
   module Testing
+    # Minitest assertions for OrchestraAI
+    module Assertions
+      # Assert that a result used a specific agent
+      def assert_used_agent(expected_agent, result, msg = nil)
+        expected = expected_agent.to_sym
+        actual = result.agent
+        msg ||= "Expected result to have used agent :#{expected}, but used :#{actual}"
+        assert_equal expected, actual, msg
+      end
+
+      # Assert that a result did not use a specific agent
+      def refute_used_agent(expected_agent, result, msg = nil)
+        expected = expected_agent.to_sym
+        actual = result.agent
+        msg ||= "Expected result not to have used agent :#{expected}"
+        refute_equal expected, actual, msg
+      end
+
+      # Assert that a result used a specific model
+      def assert_used_model(expected_model, result, msg = nil)
+        actual = result.model
+        msg ||= "Expected result to have used model '#{expected_model}', but used '#{actual}'"
+        assert_equal expected_model, actual, msg
+      end
+
+      # Assert that a result did not use a specific model
+      def refute_used_model(expected_model, result, msg = nil)
+        actual = result.model
+        msg ||= "Expected result not to have used model '#{expected_model}'"
+        refute_equal expected_model, actual, msg
+      end
+
+      # Assert that a task is classified as a specific difficulty tier
+      def assert_classified_as(expected_tier, task, msg = nil)
+        expected = expected_tier.to_sym
+        actual = Tasks::DifficultyScorer.classify(task)
+        msg ||= "Expected task to be classified as :#{expected}, but was :#{actual}"
+        assert_equal expected, actual, msg
+      end
+
+      # Assert that a task is not classified as a specific difficulty tier
+      def refute_classified_as(expected_tier, task, msg = nil)
+        expected = expected_tier.to_sym
+        actual = Tasks::DifficultyScorer.classify(task)
+        msg ||= "Expected task not to be classified as :#{expected}"
+        refute_equal expected, actual, msg
+      end
+
+      # Assert that a result is successful
+      def assert_successful(result, msg = nil)
+        msg ||= begin
+          error_msg = result.error ? ": #{result.error.message}" : ''
+          "Expected result to be successful#{error_msg}"
+        end
+        assert result.success?, msg
+      end
+
+      # Assert that a result is not successful (failed)
+      def refute_successful(result, msg = nil)
+        msg ||= 'Expected result not to be successful'
+        refute result.success?, msg
+      end
+
+      alias assert_failed refute_successful
+    end
+
+    # Legacy RSpec-style matchers (for compatibility)
     module Matchers
-      # RSpec matcher for checking if a task was executed with a specific agent
+      # Matcher for checking if a task was executed with a specific agent
       class HaveUsedAgent
         def initialize(expected_agent)
           @expected_agent = expected_agent.to_sym
@@ -24,7 +91,7 @@ module OrchestraAI
         end
       end
 
-      # RSpec matcher for checking if a task was executed with a specific model
+      # Matcher for checking if a task was executed with a specific model
       class HaveUsedModel
         def initialize(expected_model)
           @expected_model = expected_model
@@ -45,7 +112,7 @@ module OrchestraAI
         end
       end
 
-      # RSpec matcher for checking task difficulty classification
+      # Matcher for checking task difficulty classification
       class BeClassifiedAs
         def initialize(expected_tier)
           @expected_tier = expected_tier.to_sym
@@ -67,7 +134,7 @@ module OrchestraAI
         end
       end
 
-      # RSpec matcher for checking if result is successful
+      # Matcher for checking if result is successful
       class BeSuccessful
         def matches?(result)
           @result = result
@@ -75,16 +142,16 @@ module OrchestraAI
         end
 
         def failure_message
-          error_msg = @result.error ? ": #{@result.error.message}" : ""
+          error_msg = @result.error ? ": #{@result.error.message}" : ''
           "expected result to be successful#{error_msg}"
         end
 
         def failure_message_when_negated
-          "expected result not to be successful"
+          'expected result not to be successful'
         end
       end
 
-      # Helper methods for RSpec
+      # Helper methods
       def have_used_agent(agent)
         HaveUsedAgent.new(agent)
       end
@@ -104,9 +171,5 @@ module OrchestraAI
   end
 end
 
-# Auto-include in RSpec if available
-if defined?(RSpec)
-  RSpec.configure do |config|
-    config.include OrchestraAI::Testing::Matchers
-  end
-end
+# Auto-include Minitest assertions if available
+Minitest::Test.include OrchestraAI::Testing::Assertions if defined?(Minitest::Test)

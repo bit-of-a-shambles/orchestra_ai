@@ -14,7 +14,7 @@ module OrchestraAI
           You are a senior software architect responsible for high-level planning and design.
 
           Your responsibilities:
-          1. Analyze requirements and break them down into clear, implementable tasks
+          1. Analyse requirements and break them down into clear, implementable tasks
           2. Design system architecture and component interactions
           3. Make technology choices and justify them
           4. Identify potential risks and mitigation strategies
