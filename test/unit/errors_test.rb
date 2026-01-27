@@ -62,12 +62,12 @@ class ErrorsTest < Minitest::Test
     error = OrchestraAI::ParallelExecutionError.new(
       'Parallel failed',
       failed_tasks: [:task1],
-      successful_tasks: [:task2, :task3]
+      successful_tasks: %i[task2 task3]
     )
 
     assert_equal 'Parallel failed', error.message
     assert_equal [:task1], error.failed_tasks
-    assert_equal [:task2, :task3], error.successful_tasks
+    assert_equal %i[task2 task3], error.successful_tasks
   end
 
   def test_circuit_open_error_stores_provider_and_reset_at

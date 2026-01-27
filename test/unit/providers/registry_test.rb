@@ -102,7 +102,7 @@ class RegistryTest < Minitest::Test
   def test_models_for_provider_returns_provider_specific_models
     anthropic_models = OrchestraAI::Providers::Registry.models_for_provider(:anthropic)
 
-    assert anthropic_models.all? { |m| m.include?('claude') }
+    assert(anthropic_models.all? { |m| m.include?('claude') })
   end
 
   def test_provider_for_model_returns_provider_symbol

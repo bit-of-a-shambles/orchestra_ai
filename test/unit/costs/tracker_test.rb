@@ -96,8 +96,10 @@ class TrackerTest < Minitest::Test
 
   # Total cost tests
   def test_total_cost_sums_all_results
-    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
-    @tracker.record(create_result(content: 'Test 2', model: 'gpt-5-mini', usage: { input_tokens: 2000, output_tokens: 1000 }))
+    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test 2', model: 'gpt-5-mini',
+                                  usage: { input_tokens: 2000, output_tokens: 1000 }))
 
     assert @tracker.total_cost.positive?
   end
@@ -127,7 +129,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_cost_breakdown_calculates_correctly
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     breakdown = @tracker.cost_breakdown
 
@@ -138,7 +141,8 @@ class TrackerTest < Minitest::Test
 
   # Cost by provider tests
   def test_cost_by_provider_returns_hash
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     by_provider = @tracker.cost_by_provider
 
@@ -146,8 +150,10 @@ class TrackerTest < Minitest::Test
   end
 
   def test_cost_by_provider_groups_correctly
-    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
-    @tracker.record(create_result(content: 'Test 2', model: 'gpt-5-mini', usage: { input_tokens: 2000, output_tokens: 1000 }))
+    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test 2', model: 'gpt-5-mini',
+                                  usage: { input_tokens: 2000, output_tokens: 1000 }))
 
     by_provider = @tracker.cost_by_provider
 
@@ -157,7 +163,8 @@ class TrackerTest < Minitest::Test
 
   # Cost by model tests
   def test_cost_by_model_returns_hash
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     by_model = @tracker.cost_by_model
 
@@ -165,8 +172,10 @@ class TrackerTest < Minitest::Test
   end
 
   def test_cost_by_model_groups_correctly
-    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
-    @tracker.record(create_result(content: 'Test 2', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test 2', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     by_model = @tracker.cost_by_model
 
@@ -174,7 +183,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_cost_by_model_includes_count
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     by_model = @tracker.cost_by_model
 
@@ -183,7 +193,8 @@ class TrackerTest < Minitest::Test
 
   # Cost by agent tests
   def test_cost_by_agent_returns_hash
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', agent: :implementer, usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', agent: :implementer,
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     by_agent = @tracker.cost_by_agent
 
@@ -191,8 +202,10 @@ class TrackerTest < Minitest::Test
   end
 
   def test_cost_by_agent_groups_correctly
-    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash', agent: :implementer, usage: { input_tokens: 1000, output_tokens: 500 }))
-    @tracker.record(create_result(content: 'Test 2', model: 'gpt-5-mini', agent: :reviewer, usage: { input_tokens: 2000, output_tokens: 1000 }))
+    @tracker.record(create_result(content: 'Test 1', model: 'gemini-2.5-flash', agent: :implementer,
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test 2', model: 'gpt-5-mini', agent: :reviewer,
+                                  usage: { input_tokens: 2000, output_tokens: 1000 }))
 
     by_agent = @tracker.cost_by_agent
 
@@ -201,7 +214,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_cost_by_agent_includes_count
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', agent: :implementer, usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', agent: :implementer,
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     by_agent = @tracker.cost_by_agent
 
@@ -210,7 +224,8 @@ class TrackerTest < Minitest::Test
 
   # Premium equivalent cost tests
   def test_premium_equivalent_cost_calculates_correctly
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     premium_cost = @tracker.premium_equivalent_cost
 
@@ -246,7 +261,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_savings_report_includes_tasks_completed
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     report = @tracker.savings_report
 
@@ -277,7 +293,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_savings_report_calculates_savings_correctly
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     report = @tracker.savings_report
 
@@ -286,7 +303,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_savings_report_calculates_percentage_correctly
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     report = @tracker.savings_report
 
@@ -310,7 +328,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_savings_summary_includes_tasks_completed
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     assert_includes @tracker.savings_summary, 'Tasks Completed: 1'
   end
@@ -329,7 +348,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_savings_summary_includes_provider_breakdown
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     summary = @tracker.savings_summary
 
@@ -337,7 +357,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_savings_summary_includes_model_breakdown
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     summary = @tracker.savings_summary
 
@@ -346,7 +367,8 @@ class TrackerTest < Minitest::Test
   end
 
   def test_savings_summary_includes_budget_status
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     summary = @tracker.savings_summary
 
@@ -355,7 +377,8 @@ class TrackerTest < Minitest::Test
 
   # Reset tests
   def test_reset_clears_results
-    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash', usage: { input_tokens: 1000, output_tokens: 500 }))
+    @tracker.record(create_result(content: 'Test', model: 'gemini-2.5-flash',
+                                  usage: { input_tokens: 1000, output_tokens: 500 }))
 
     @tracker.reset
 

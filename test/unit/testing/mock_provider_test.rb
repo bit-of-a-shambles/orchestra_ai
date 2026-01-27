@@ -78,7 +78,7 @@ class MockProviderTest < Minitest::Test
     provider.queue_response('Second')
     messages = [{ role: 'user', content: 'Hi' }]
 
-    provider.complete(messages)  # First
+    provider.complete(messages) # First
     result = provider.complete(messages)
 
     assert_equal 'Second', result[:content]

@@ -53,7 +53,7 @@ module OrchestraAI
           difficulty: difficulty,
           classification: classification,
           stage_details: estimate[:stages], # Preserve detailed stage estimates
-          stages: stages,                    # Role symbols for convenience
+          stages: stages, # Role symbols for convenience
           models: models
         )
       end

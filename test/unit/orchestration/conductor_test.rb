@@ -92,7 +92,7 @@ class ConductorTest < Minitest::Test
   end
 
   def test_execute_with_auto_pattern_for_moderate_task
-    @mock_provider = OrchestraAI::Testing::MockProvider.new(responses: ['Implementation', 'Review'])
+    @mock_provider = OrchestraAI::Testing::MockProvider.new(responses: %w[Implementation Review])
     task = OrchestraAI::Tasks::Definition.new(
       description: 'Add a new feature',
       difficulty: 0.5
@@ -125,7 +125,7 @@ class ConductorTest < Minitest::Test
   end
 
   def test_execute_with_auto_pattern_for_complex_task
-    @mock_provider = OrchestraAI::Testing::MockProvider.new(responses: ['Plan', 'Implementation', 'Review'])
+    @mock_provider = OrchestraAI::Testing::MockProvider.new(responses: %w[Plan Implementation Review])
     task = OrchestraAI::Tasks::Definition.new(
       description: 'Design and implement a distributed system',
       difficulty: 0.9
@@ -142,7 +142,7 @@ class ConductorTest < Minitest::Test
   end
 
   def test_execute_with_pipeline_pattern
-    @mock_provider = OrchestraAI::Testing::MockProvider.new(responses: ['Plan', 'Implementation', 'Review'])
+    @mock_provider = OrchestraAI::Testing::MockProvider.new(responses: %w[Plan Implementation Review])
     task = OrchestraAI::Tasks::Definition.new(description: 'Build something')
 
     OrchestraAI::Providers::Registry.stub(:create_for_model, @mock_provider) do

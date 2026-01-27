@@ -14,7 +14,8 @@ class CircuitBreakerTest < Minitest::Test
     breaker = OrchestraAI::Reliability::CircuitBreaker.new(name: 'test')
 
     assert_equal 'test', breaker.name
-    assert_equal OrchestraAI.configuration.circuit_breaker.failure_threshold, breaker.instance_variable_get(:@failure_threshold)
+    assert_equal OrchestraAI.configuration.circuit_breaker.failure_threshold,
+                 breaker.instance_variable_get(:@failure_threshold)
   end
 
   def test_initialise_with_custom_values
@@ -51,7 +52,9 @@ class CircuitBreakerTest < Minitest::Test
     )
 
     3.times do
-      breaker.execute { raise StandardError, 'fail' } rescue nil
+      breaker.execute { raise StandardError, 'fail' }
+    rescue StandardError
+      nil
     end
 
     assert breaker.open?
@@ -63,7 +66,11 @@ class CircuitBreakerTest < Minitest::Test
       failure_threshold: 1
     )
 
-    breaker.execute { raise StandardError, 'fail' } rescue nil
+    begin
+      breaker.execute { raise StandardError, 'fail' }
+    rescue StandardError
+      nil
+    end
 
     assert_raises(OrchestraAI::CircuitOpenError) do
       breaker.execute { 'should not execute' }
@@ -76,7 +83,11 @@ class CircuitBreakerTest < Minitest::Test
       failure_threshold: 3
     )
 
-    2.times { breaker.execute { raise StandardError } rescue nil }
+    2.times do
+      breaker.execute { raise StandardError }
+    rescue StandardError
+      nil
+    end
     breaker.execute { 'success' }
 
     assert_equal 0, breaker.failure_count.value
@@ -90,7 +101,11 @@ class CircuitBreakerTest < Minitest::Test
       reset_timeout: 0.01
     )
 
-    breaker.execute { raise StandardError } rescue nil
+    begin
+      breaker.execute { raise StandardError }
+    rescue StandardError
+      nil
+    end
     assert breaker.open?
 
     sleep 0.02
@@ -106,7 +121,11 @@ class CircuitBreakerTest < Minitest::Test
       reset_timeout: 0.01
     )
 
-    breaker.execute { raise StandardError } rescue nil
+    begin
+      breaker.execute { raise StandardError }
+    rescue StandardError
+      nil
+    end
     sleep 0.02
 
     breaker.execute { 'success' }
@@ -121,10 +140,18 @@ class CircuitBreakerTest < Minitest::Test
       reset_timeout: 0.01
     )
 
-    breaker.execute { raise StandardError } rescue nil
+    begin
+      breaker.execute { raise StandardError }
+    rescue StandardError
+      nil
+    end
     sleep 0.02
 
-    breaker.execute { raise StandardError } rescue nil
+    begin
+      breaker.execute { raise StandardError }
+    rescue StandardError
+      nil
+    end
 
     assert breaker.open?
   end
@@ -135,7 +162,11 @@ class CircuitBreakerTest < Minitest::Test
       failure_threshold: 1
     )
 
-    breaker.execute { raise StandardError } rescue nil
+    begin
+      breaker.execute { raise StandardError }
+    rescue StandardError
+      nil
+    end
     assert breaker.open?
 
     breaker.reset
@@ -168,7 +199,7 @@ class CircuitBreakerTest < Minitest::Test
     breaker = OrchestraAI::Reliability::CircuitBreaker.new(
       name: 'test',
       failure_threshold: 1,
-      reset_timeout: 60  # Long timeout so it won't elapse
+      reset_timeout: 60 # Long timeout so it won't elapse
     )
 
     breaker.trip!
@@ -184,7 +215,7 @@ class CircuitBreakerTest < Minitest::Test
     )
 
     breaker.trip!
-    sleep 0.02  # Wait for reset timeout
+    sleep 0.02 # Wait for reset timeout
 
     # allow_request? returns true when reset timeout has passed (transition happens internally)
     result = breaker.allow_request?

@@ -120,7 +120,7 @@ class DifficultyScorerTest < Minitest::Test
     )
 
     # Very long context should hit the length_score branch
-    very_long_context = 'A' * 10_000  # Over 5000 chars
+    very_long_context = 'A' * 10_000 # Over 5000 chars
     task_long_ctx = OrchestraAI::Tasks::Definition.new(
       description: 'Task',
       context: [very_long_context]

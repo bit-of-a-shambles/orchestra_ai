@@ -83,7 +83,8 @@ class ParallelResultTest < Minitest::Test
   def test_partial_success_when_some_succeed
     results = [
       OrchestraAI::Tasks::Result.new(content: 'A', task: @task, agent: :architect),
-      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new, success: false)
+      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new,
+                                     success: false)
     ]
     par_result = OrchestraAI::Orchestration::Patterns::ParallelResult.new(results)
 
@@ -94,7 +95,8 @@ class ParallelResultTest < Minitest::Test
 
   def test_successful_returns_only_successful_results
     good = OrchestraAI::Tasks::Result.new(content: 'A', task: @task, agent: :architect)
-    bad = OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new, success: false)
+    bad = OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new,
+                                         success: false)
     par_result = OrchestraAI::Orchestration::Patterns::ParallelResult.new([good, bad])
 
     successful = par_result.successful
@@ -104,7 +106,8 @@ class ParallelResultTest < Minitest::Test
 
   def test_failures_returns_only_failed_results
     good = OrchestraAI::Tasks::Result.new(content: 'A', task: @task, agent: :architect)
-    bad = OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new, success: false)
+    bad = OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new,
+                                         success: false)
     par_result = OrchestraAI::Orchestration::Patterns::ParallelResult.new([good, bad])
 
     failures = par_result.failures
@@ -116,7 +119,8 @@ class ParallelResultTest < Minitest::Test
     results = [
       OrchestraAI::Tasks::Result.new(content: 'A', task: @task, agent: :architect),
       OrchestraAI::Tasks::Result.new(content: 'B', task: @task, agent: :implementer),
-      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :reviewer, error: StandardError.new, success: false)
+      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :reviewer, error: StandardError.new,
+                                     success: false)
     ]
     par_result = OrchestraAI::Orchestration::Patterns::ParallelResult.new(results)
 
@@ -161,7 +165,8 @@ class ParallelResultTest < Minitest::Test
   def test_failed_returns_true_when_any_failed
     results = [
       OrchestraAI::Tasks::Result.new(content: 'A', task: @task, agent: :architect),
-      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new, success: false)
+      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new,
+                                     success: false)
     ]
     par_result = OrchestraAI::Orchestration::Patterns::ParallelResult.new(results)
 

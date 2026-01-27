@@ -47,7 +47,7 @@ class GemspecTest < Minitest::Test
     executable_path = File.join(File.dirname(@gemspec_path), @gemspec.bindir, 'orchestra')
     content = File.read(executable_path)
 
-    refute_match(/require.*bundler\/setup/, content,
+    refute_match(%r{require.*bundler/setup}, content,
                  'Executable should not require bundler/setup (breaks gem installation)')
   end
 

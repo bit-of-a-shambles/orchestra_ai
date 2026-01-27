@@ -36,6 +36,7 @@ module OrchestraAI
   # Orchestration errors
   class OrchestrationError < Error; end
   class PipelineError < OrchestrationError; end
+
   class ParallelExecutionError < OrchestrationError
     attr_reader :failed_tasks, :successful_tasks
 
@@ -59,6 +60,7 @@ module OrchestraAI
 
   # Budget errors
   class BudgetError < Error; end
+
   class BudgetExceededError < BudgetError
     attr_reader :provider, :required, :available
 

@@ -34,7 +34,10 @@ class RetryPolicyTest < Minitest::Test
     policy = OrchestraAI::Reliability::RetryPolicy.new
     attempts = 0
 
-    result = policy.execute { attempts += 1; 'success' }
+    result = policy.execute do
+      attempts += 1
+      'success'
+    end
 
     assert_equal 'success', result
     assert_equal 1, attempts
@@ -47,6 +50,7 @@ class RetryPolicyTest < Minitest::Test
     result = policy.execute do
       attempts += 1
       raise OrchestraAI::ProviderRateLimitError.new('Rate limited', provider: 'test') if attempts < 3
+
       'success'
     end
 
@@ -83,6 +87,7 @@ class RetryPolicyTest < Minitest::Test
     result = policy.execute do
       attempts += 1
       raise OrchestraAI::ProviderTimeoutError.new('Timeout', provider: 'test') if attempts < 2
+
       'done'
     end
 

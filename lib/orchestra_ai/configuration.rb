@@ -5,6 +5,9 @@ module OrchestraAI
     # API Keys
     attr_accessor :anthropic_api_key, :openai_api_key, :google_api_key
 
+    # Admin API Keys (for billing/usage APIs)
+    attr_accessor :anthropic_admin_key, :openai_admin_key
+
     # Logging
     attr_accessor :logger, :log_level
 
@@ -15,6 +18,8 @@ module OrchestraAI
       @anthropic_api_key = ENV.fetch('ANTHROPIC_API_KEY', nil)
       @openai_api_key = ENV.fetch('OPENAI_API_KEY', nil)
       @google_api_key = ENV.fetch('GOOGLE_API_KEY', nil)
+      @anthropic_admin_key = ENV.fetch('ANTHROPIC_ADMIN_KEY', nil)
+      @openai_admin_key = ENV.fetch('OPENAI_ADMIN_KEY', nil)
       @logger = nil
       @log_level = :info
 
@@ -132,9 +137,7 @@ module OrchestraAI
 
       def set_limit(provider, amount)
         provider = provider.to_sym
-        unless %i[anthropic openai google].include?(provider)
-          raise ArgumentError, "Unknown provider: #{provider}"
-        end
+        raise ArgumentError, "Unknown provider: #{provider}" unless %i[anthropic openai google].include?(provider)
 
         @limits[provider] = amount&.to_f
       end

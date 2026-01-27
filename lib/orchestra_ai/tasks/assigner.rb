@@ -15,9 +15,7 @@ module OrchestraAI
           model = select_model(agent, tier)
 
           # Verify model is available, fallback if not
-          unless Providers::Registry.model_available?(model)
-            model = find_fallback(agent, tier)
-          end
+          model = find_fallback(agent, tier) unless Providers::Registry.model_available?(model)
 
           task.assigned_model = model
           task.assigned_agent = agent

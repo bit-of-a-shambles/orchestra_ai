@@ -242,7 +242,7 @@ class EstimatorTest < Minitest::Test
       output_tokens: 1_000_000
     )
 
-    assert_equal 5.00, result[:input]  # $5/1M input
+    assert_equal 5.00, result[:input] # $5/1M input
     assert_equal 25.00, result[:output] # $25/1M output
     assert_equal 30.00, result[:total]
   end

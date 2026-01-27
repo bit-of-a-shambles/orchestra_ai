@@ -260,9 +260,13 @@ Set your API keys as environment variables:
 export ANTHROPIC_API_KEY="your-key"
 export OPENAI_API_KEY="your-key"
 export GOOGLE_API_KEY="your-key"
+
+# Optional: Admin keys for billing/usage API access
+export ANTHROPIC_ADMIN_KEY="sk-ant-admin-..."  # From console.anthropic.com
+export OPENAI_ADMIN_KEY="sk-admin-..."          # From platform.openai.com/settings/organization/admin-keys
 ```
 
-You only need to configure the providers you want to use.
+You only need to configure the providers you want to use. Admin keys are only needed for the `orchestra usage` command.
 
 ## Quick Start (CLI)
 
@@ -289,6 +293,12 @@ orchestra score "Implement distributed locking"
 # Show budget status and spending
 orchestra budget
 
+# Fetch actual usage from provider APIs
+orchestra usage
+
+# Show budget with live usage from APIs
+orchestra budget --fetch
+
 # List available models with pricing
 orchestra models
 
@@ -310,6 +320,10 @@ OrchestraAI.configure do |c|
   c.anthropic_api_key = ENV["ANTHROPIC_API_KEY"]
   c.openai_api_key = ENV["OPENAI_API_KEY"]
   c.google_api_key = ENV["GOOGLE_API_KEY"]
+  
+  # Optional: Admin keys for billing/usage API access
+  c.anthropic_admin_key = ENV["ANTHROPIC_ADMIN_KEY"]
+  c.openai_admin_key = ENV["OPENAI_ADMIN_KEY"]
 end
 ```
 
@@ -572,6 +586,51 @@ budget.status_summary
 #   google: { spent: 0.30, limit: 2.0, remaining: 1.70, percentage: 15.0 }
 # }
 ```
+
+### Provider Billing API Integration
+
+OrchestraAI can fetch actual usage data from provider APIs. This is useful for monitoring your real spending across providers.
+
+**CLI Usage:**
+
+```bash
+# Fetch usage from all configured providers
+orchestra usage
+
+# Include usage data in budget output
+orchestra budget --fetch
+```
+
+**Ruby API:**
+
+```ruby
+require 'orchestra_ai/costs/billing_fetcher'
+
+# Fetch from all providers
+results = OrchestraAI::Costs::BillingFetcher.fetch_all(
+  openai: ENV['OPENAI_API_KEY'],
+  anthropic: ENV['ANTHROPIC_API_KEY'],
+  google: ENV['GOOGLE_API_KEY']
+)
+
+# Check OpenAI usage
+if results[:openai].success?
+  puts "OpenAI cost this month: $#{results[:openai].cost_this_month}"
+  puts "Total tokens: #{results[:openai].total_tokens}"
+end
+```
+
+**Provider API Notes:**
+
+| Provider | API Support | Notes |
+|----------|------------|-------|
+| OpenAI | ✅ Costs & Usage API | Requires admin key for costs; regular key for token usage |
+| Anthropic | ✅ Usage & Cost API | Requires admin key (`sk-ant-admin...`) |
+| Google | ❌ Requires OAuth2 | Google Cloud Billing API needs separate GCP project setup |
+
+**Note:** Both OpenAI and Anthropic require **admin API keys** for billing access:
+- **OpenAI**: Set `OPENAI_ADMIN_KEY` (get from platform.openai.com/settings/organization/admin-keys)
+- **Anthropic**: Set `ANTHROPIC_ADMIN_KEY` (get from console.anthropic.com, must start with `sk-ant-admin...`)
 
 ## Testing
 

@@ -16,7 +16,7 @@ class BaseProviderTest < Minitest::Test
     end
 
     def available_models
-      ['test-model', 'test-model-2']
+      %w[test-model test-model-2]
     end
   end
 
@@ -131,11 +131,10 @@ class BaseProviderTest < Minitest::Test
     provider = TestProvider.new(api_key: 'key')
 
     response = provider.send(:build_response,
-      content: 'Test content',
-      model: 'test-model',
-      usage: { input_tokens: 10 },
-      raw: {}
-    )
+                             content: 'Test content',
+                             model: 'test-model',
+                             usage: { input_tokens: 10 },
+                             raw: {})
 
     assert_equal 'Test content', response[:content]
     assert_equal 'test-model', response[:model]

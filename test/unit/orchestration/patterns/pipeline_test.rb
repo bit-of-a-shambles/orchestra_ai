@@ -40,7 +40,7 @@ class PipelinePatternTest < Minitest::Test
       .stage(:review) { |t, ctx| 'review' }
 
     assert_equal 3, @pipeline.stages.size
-    assert_equal [:plan, :implement, :review], @pipeline.stages.map { |s| s[:name] }
+    assert_equal(%i[plan implement review], @pipeline.stages.map { |s| s[:name] })
   end
 
   def test_standard_creates_three_stage_pipeline
@@ -65,7 +65,7 @@ class PipelineResultTest < Minitest::Test
   def test_success_when_all_stages_complete
     result = OrchestraAI::Orchestration::Patterns::PipelineResult.new(
       results: { plan: 'done', implement: 'done' },
-      completed_stages: [:plan, :implement],
+      completed_stages: %i[plan implement],
       failed_stage: nil,
       success: true
     )
@@ -90,7 +90,7 @@ class PipelineResultTest < Minitest::Test
   def test_results_contains_stage_outputs
     result = OrchestraAI::Orchestration::Patterns::PipelineResult.new(
       results: { plan: 'architecture', implement: 'code' },
-      completed_stages: [:plan, :implement],
+      completed_stages: %i[plan implement],
       failed_stage: nil,
       success: true
     )
@@ -102,12 +102,12 @@ class PipelineResultTest < Minitest::Test
   def test_completed_stages_lists_finished_stages
     result = OrchestraAI::Orchestration::Patterns::PipelineResult.new(
       results: { plan: 'done', implement: 'done', review: 'done' },
-      completed_stages: [:plan, :implement, :review],
+      completed_stages: %i[plan implement review],
       failed_stage: nil,
       success: true
     )
 
-    assert_equal [:plan, :implement, :review], result.completed_stages
+    assert_equal %i[plan implement review], result.completed_stages
   end
 
   def test_bracket_accessor_returns_stage_result
@@ -129,7 +129,7 @@ class PipelineResultTest < Minitest::Test
         plan: OrchestraAI::Tasks::Result.new(content: 'Plan', task: @task, agent: :architect),
         review: final_result
       },
-      completed_stages: [:plan, :review],
+      completed_stages: %i[plan review],
       failed_stage: nil,
       success: true
     )
@@ -154,7 +154,7 @@ class PipelineResultTest < Minitest::Test
         plan: OrchestraAI::Tasks::Result.new(content: 'Architecture', task: @task, agent: :architect),
         implement: OrchestraAI::Tasks::Result.new(content: 'Code', task: @task, agent: :implementer)
       },
-      completed_stages: [:plan, :implement],
+      completed_stages: %i[plan implement],
       failed_stage: nil,
       success: true
     )
@@ -199,7 +199,7 @@ class PipelineResultTest < Minitest::Test
     }
     result = OrchestraAI::Orchestration::Patterns::PipelineResult.new(
       results: results,
-      completed_stages: [:plan, :implement],
+      completed_stages: %i[plan implement],
       failed_stage: nil,
       success: true
     )
@@ -264,7 +264,7 @@ class PipelineExecutionTest < Minitest::Test
 
     result = pipeline.execute(@task)
 
-    assert_equal [:first, :second], execution_order
+    assert_equal %i[first second], execution_order
     assert result.success?
   end
 

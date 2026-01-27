@@ -75,7 +75,7 @@ module OrchestraAI
       end
 
       def find_affordable_alternatives(task, original_estimate)
-        stage_roles = original_estimate[:stages]        # Role symbols like [:implementer, :reviewer]
+        stage_roles = original_estimate[:stages] # Role symbols like [:implementer, :reviewer]
         stage_details = original_estimate[:stage_details] # Detailed estimates with model, provider info
         alternative_models = []
         total_by_provider = Hash.new(0.0)
@@ -123,9 +123,7 @@ module OrchestraAI
 
             projected_total = current_spend[provider] + estimate[:safe][:total]
 
-            if @budget.can_afford?(projected_total, provider)
-              return model
-            end
+            return model if @budget.can_afford?(projected_total, provider)
           end
         end
 
@@ -210,9 +208,7 @@ module OrchestraAI
             warnings << "#{provider} budget at alert threshold (#{(@budget.alert_threshold * 100).to_i}%)"
           end
 
-          if @budget.exceeded?(provider)
-            warnings << "#{provider} budget exceeded"
-          end
+          warnings << "#{provider} budget exceeded" if @budget.exceeded?(provider)
         end
 
         warnings

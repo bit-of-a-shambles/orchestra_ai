@@ -26,9 +26,7 @@ module OrchestraAI
         unless skip_planning
           execution_plan = plan(task)
 
-          if OrchestraAI.configuration.budget.enforce_limits
-            handle_budget_enforcement(execution_plan, options)
-          end
+          handle_budget_enforcement(execution_plan, options) if OrchestraAI.configuration.budget.enforce_limits
         end
 
         result = case pattern
@@ -99,21 +97,17 @@ module OrchestraAI
           when :reject
             raise BudgetExceededError, 'Insufficient budget to execute task'
           when :warn
-            warn "[OrchestraAI] Warning: Insufficient budget. Task may not complete satisfactorily."
+            warn '[OrchestraAI] Warning: Insufficient budget. Task may not complete satisfactorily.'
           when :downgrade
             # Use alternative models if available
-            if execution_plan.alternatives
-              options[:models] = execution_plan.alternatives[:models]
-            end
+            options[:models] = execution_plan.alternatives[:models] if execution_plan.alternatives
           end
         when :partial
           case config.fallback_strategy
           when :warn
-            warn "[OrchestraAI] Warning: Partial budget available. Using cheaper alternatives."
+            warn '[OrchestraAI] Warning: Partial budget available. Using cheaper alternatives.'
           when :downgrade
-            if execution_plan.alternatives
-              options[:models] = execution_plan.alternatives[:models]
-            end
+            options[:models] = execution_plan.alternatives[:models] if execution_plan.alternatives
           end
         end
       end

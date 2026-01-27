@@ -77,7 +77,8 @@ class SequentialResultTest < Minitest::Test
   def test_failed_when_any_result_fails
     results = [
       OrchestraAI::Tasks::Result.new(content: 'A', task: @task, agent: :architect),
-      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new, success: false)
+      OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new,
+                                     success: false)
     ]
     seq_result = OrchestraAI::Orchestration::Patterns::SequentialResult.new(results)
 
@@ -86,7 +87,8 @@ class SequentialResultTest < Minitest::Test
   end
 
   def test_first_failure_returns_first_failed_result
-    failed_result = OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer, error: StandardError.new, success: false)
+    failed_result = OrchestraAI::Tasks::Result.new(content: nil, task: @task, agent: :implementer,
+                                                   error: StandardError.new, success: false)
     results = [
       OrchestraAI::Tasks::Result.new(content: 'A', task: @task, agent: :architect),
       failed_result
@@ -202,7 +204,7 @@ class SequentialExecutionTest < Minitest::Test
     error_provider = OrchestraAI::Testing::MockProvider.new(responses: [])
     error_provider.queue_error(StandardError.new('Failed'))
     error_provider.queue_response('Success')
-    
+
     pattern = OrchestraAI::Orchestration::Patterns::Sequential.new([@task1, @task2], agent: :implementer)
 
     OrchestraAI::Providers::Registry.stub(:create_for_model, error_provider) do
@@ -219,8 +221,8 @@ class SequentialExecutionTest < Minitest::Test
     error_provider.queue_response('Success')
 
     pattern = OrchestraAI::Orchestration::Patterns::Sequential.new(
-      [@task1, @task2], 
-      agent: :implementer, 
+      [@task1, @task2],
+      agent: :implementer,
       stop_on_failure: false
     )
 

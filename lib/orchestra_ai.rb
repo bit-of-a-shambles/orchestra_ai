@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "zeitwerk"
+require 'zeitwerk'
 
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect(
-  "orchestra_ai" => "OrchestraAI",
-  "ruby_llm_provider" => "RubyLLMProvider"
+  'orchestra_ai' => 'OrchestraAI',
+  'ruby_llm_provider' => 'RubyLLMProvider'
 )
 loader.ignore("#{__dir__}/orchestra_ai/errors.rb")
 loader.ignore("#{__dir__}/orchestra_ai/version.rb")
@@ -16,9 +16,9 @@ loader.ignore("#{__dir__}/orchestra_ai/providers/openai.rb")
 loader.ignore("#{__dir__}/orchestra_ai/providers/google.rb")
 loader.setup
 
-require_relative "orchestra_ai/version"
-require_relative "orchestra_ai/errors"
-require_relative "orchestra_ai/configuration"
+require_relative 'orchestra_ai/version'
+require_relative 'orchestra_ai/errors'
+require_relative 'orchestra_ai/configuration'
 
 module OrchestraAI
   class << self
@@ -76,7 +76,7 @@ module OrchestraAI
 
     def default_logger
       @default_logger ||= begin
-        require "logger"
+        require 'logger'
         Logger.new($stdout, level: configuration.log_level)
       end
     end

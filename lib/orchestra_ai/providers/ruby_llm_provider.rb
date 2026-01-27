@@ -37,14 +37,14 @@ module OrchestraAI
         normalized = normalize_messages(messages)
 
         chat = RubyLLM.chat(model: effective_model)
-        
+
         # Add system message if present
         system_msg = normalized.find { |m| m[:role] == 'system' }
         chat.with_instructions(system_msg[:content]) if system_msg
 
         # Build conversation from messages
         user_messages = normalized.reject { |m| m[:role] == 'system' }
-        
+
         response = nil
         user_messages.each do |msg|
           if msg[:role] == 'user'
@@ -69,7 +69,7 @@ module OrchestraAI
         normalized = normalize_messages(messages)
 
         chat = RubyLLM.chat(model: effective_model)
-        
+
         # Add system message if present
         system_msg = normalized.find { |m| m[:role] == 'system' }
         chat.with_instructions(system_msg[:content]) if system_msg

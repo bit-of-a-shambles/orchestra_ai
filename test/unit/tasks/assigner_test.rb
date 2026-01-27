@@ -124,7 +124,7 @@ class AssignerTest < Minitest::Test
     # Create a clearly complex task
     task = OrchestraAI::Tasks::Definition.new(
       description: 'Design a distributed microservices architecture with event-driven communication, implementing CQRS pattern with event sourcing for data consistency across multiple domains',
-      difficulty: 0.95  # Force high difficulty
+      difficulty: 0.95 # Force high difficulty
     )
 
     model = OrchestraAI::Tasks::Assigner.assign(task, agent: :architect)

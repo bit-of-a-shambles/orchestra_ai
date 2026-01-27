@@ -72,7 +72,7 @@ class RouterPatternTest < Minitest::Test
     router = OrchestraAI::Orchestration::Patterns::Router.by_difficulty
 
     assert_instance_of OrchestraAI::Orchestration::Patterns::Router, router
-    assert router.routes.size >= 3  # simple, moderate, complex
+    assert router.routes.size >= 3 # simple, moderate, complex
   end
 
   def test_for_code_creates_code_focused_router
@@ -300,7 +300,7 @@ class RouterExecutionTest < Minitest::Test
   end
 
   def test_execute_with_by_difficulty_handles_complex_tasks
-    mock_provider = OrchestraAI::Testing::MockProvider.new(responses: ['Plan', 'Impl', 'Review'])
+    mock_provider = OrchestraAI::Testing::MockProvider.new(responses: %w[Plan Impl Review])
     complex_task = OrchestraAI::Tasks::Definition.new(description: 'complex task', difficulty: 0.9)
 
     router = OrchestraAI::Orchestration::Patterns::Router.by_difficulty

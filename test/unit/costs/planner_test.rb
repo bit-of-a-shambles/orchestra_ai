@@ -159,9 +159,9 @@ class PlannerTest < Minitest::Test
     plan = planner.plan(@task)
 
     # Should have alternatives if not sufficient
-    if plan.sufficiency != :sufficient
-      refute_nil plan.alternatives
-    end
+    return unless plan.sufficiency != :sufficient
+
+    refute_nil plan.alternatives
   end
 
   # Can execute tests

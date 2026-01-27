@@ -1,21 +1,24 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "bundler/setup"
-require "orchestra_ai"
-require "thor"
+require 'orchestra_ai'
+require 'thor'
 
 module OrchestraAI
   class CLI < Thor
-    desc "execute DESCRIPTION", "Execute a task with AI agents"
-    option :pattern, type: :string, default: "auto",
-                     desc: "Execution pattern: auto, pipeline, parallel"
+    def self.exit_on_failure?
+      true
+    end
+
+    desc 'execute DESCRIPTION', 'Execute a task with AI agents'
+    option :pattern, type: :string, default: 'auto',
+                     desc: 'Execution pattern: auto, pipeline, parallel'
     option :agent, type: :string,
-                   desc: "Specific agent: architect, implementer, reviewer"
+                   desc: 'Specific agent: architect, implementer, reviewer'
     option :model, type: :string,
-                   desc: "Specific model to use"
+                   desc: 'Specific model to use'
     option :stream, type: :boolean, default: false,
-                    desc: "Stream output"
+                    desc: 'Stream output'
     def execute(description)
       configure_from_env
 
@@ -39,9 +42,9 @@ module OrchestraAI
       exit 1
     end
 
-    desc "models", "List available models with pricing"
+    desc 'models', 'List available models with pricing'
     def models
-      say "Available Models:", :green
+      say 'Available Models:', :green
       puts
 
       Providers::Registry::MODEL_TO_PROVIDER.group_by { |_, p| p }.each do |provider, models|
@@ -51,7 +54,7 @@ module OrchestraAI
           info = provider_class::MODELS[model]
           if info
             available = OrchestraAI.configuration.provider_available?(provider)
-            status = available ? "[available]" : "[not configured]"
+            status = available ? '[available]' : '[not configured]'
             say "  #{model} #{status}"
             say "    Input: $#{info[:input]}/1M tokens, Output: $#{info[:output]}/1M tokens"
             say "    Context: #{info[:context].to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse} tokens"
@@ -63,20 +66,25 @@ module OrchestraAI
       end
     end
 
-    desc "config", "Show current configuration"
+    desc 'config', 'Show current configuration'
     def config
       cfg = OrchestraAI.configuration
 
-      say "Configuration:", :green
+      say 'Configuration:', :green
       puts
 
-      say "API Keys:", :cyan
+      say 'API Keys:', :cyan
       say "  Anthropic: #{cfg.anthropic_api_key ? '[configured]' : '[not set]'}"
       say "  OpenAI: #{cfg.openai_api_key ? '[configured]' : '[not set]'}"
       say "  Google: #{cfg.google_api_key ? '[configured]' : '[not set]'}"
       puts
 
-      say "Model Defaults:", :cyan
+      say 'Admin Keys (for billing APIs):', :cyan
+      say "  Anthropic: #{cfg.anthropic_admin_key ? '[configured]' : '[not set]'}"
+      say "  OpenAI: #{cfg.openai_admin_key ? '[configured]' : '[not set]'}"
+      puts
+
+      say 'Model Defaults:', :cyan
       %i[architect implementer reviewer].each do |role|
         say "  #{role.to_s.capitalize}:"
         model_config = cfg.models.send(role)
@@ -86,13 +94,13 @@ module OrchestraAI
       end
       puts
 
-      say "Difficulty Thresholds:", :cyan
+      say 'Difficulty Thresholds:', :cyan
       say "  Simple: < #{cfg.difficulty.simple_threshold}"
       say "  Moderate: #{cfg.difficulty.simple_threshold} - #{cfg.difficulty.moderate_threshold}"
       say "  Complex: >= #{cfg.difficulty.moderate_threshold}"
     end
 
-    desc "score DESCRIPTION", "Score a task's difficulty"
+    desc 'score DESCRIPTION', "Score a task's difficulty"
     def score(description)
       task = Tasks::Definition.new(description: description)
       score = Tasks::DifficultyScorer.score(task)
@@ -104,28 +112,36 @@ module OrchestraAI
 
       # Show what model would be used for each agent
       puts
-      say "Model Selection:", :green
+      say 'Model Selection:', :green
       %i[architect implementer reviewer].each do |agent|
         Tasks::Assigner.assign(task.dup_with, agent: agent)
         say "  #{agent.to_s.capitalize}: #{task.assigned_model}"
       end
     end
 
-    desc "budget", "Show budget status and spending"
+    desc 'budget', 'Show budget status and spending'
+    option :fetch, type: :boolean, default: false,
+                   desc: 'Fetch actual usage from provider APIs'
     def budget
       configure_from_env
       budget_config = OrchestraAI.configuration.budget
 
-      say "Budget Status:", :green
+      say 'Budget Status:', :green
       puts
 
-      say "Configuration:", :cyan
+      say 'Configuration:', :cyan
       say "  Alert threshold: #{(budget_config.alert_threshold * 100).to_i}%"
       say "  Enforce limits: #{budget_config.enforce_limits}"
       say "  Fallback strategy: #{budget_config.fallback_strategy}"
       puts
 
-      say "Per-Provider Limits:", :cyan
+      # Fetch actual billing data from provider APIs if requested
+      if options[:fetch]
+        fetch_provider_billing
+        puts
+      end
+
+      say 'Per-Provider Limits:', :cyan
       budget_obj = budget_config.to_budget
 
       %i[anthropic openai google].each do |provider|
@@ -136,24 +152,31 @@ module OrchestraAI
 
         if limit.finite?
           status = if budget_obj.exceeded?(provider)
-                     set_color("[EXCEEDED]", :red)
+                     set_color('[EXCEEDED]', :red)
                    elsif budget_obj.at_alert_threshold?(provider)
-                     set_color("[WARNING]", :yellow)
+                     set_color('[WARNING]', :yellow)
                    else
-                     set_color("[OK]", :green)
+                     set_color('[OK]', :green)
                    end
 
-          say "  #{provider.to_s.capitalize}: $#{sprintf('%.2f', spent)} / $#{sprintf('%.2f', limit)} (#{percentage}%) #{status}"
+          say "  #{provider.to_s.capitalize}: $#{format('%.2f',
+                                                        spent)} / $#{format('%.2f', limit)} (#{percentage}%) #{status}"
         else
-          say "  #{provider.to_s.capitalize}: $#{sprintf('%.2f', spent)} / unlimited"
+          say "  #{provider.to_s.capitalize}: $#{format('%.2f', spent)} / unlimited"
         end
       end
 
       puts
-      say "Total spent: $#{sprintf('%.4f', budget_obj.total_spent)}", :cyan
+      say "Total spent: $#{format('%.4f', budget_obj.total_spent)}", :cyan
     end
 
-    desc "version", "Show version"
+    desc 'usage', 'Fetch actual usage/billing from provider APIs'
+    def usage
+      configure_from_env
+      fetch_provider_billing
+    end
+
+    desc 'version', 'Show version'
     def version
       say "OrchestraAI #{OrchestraAI::VERSION}"
     end
@@ -165,7 +188,7 @@ module OrchestraAI
         # Configuration is loaded from env vars by default
       end
     rescue ConfigurationError
-      say "Warning: No API keys configured. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY", :yellow
+      say 'Warning: No API keys configured. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY', :yellow
     end
 
     def get_agent(name)
@@ -182,18 +205,61 @@ module OrchestraAI
       if result.respond_to?(:success?) && result.success?
         say result.content
         puts
-        say "---", :cyan
+        say '---', :cyan
         say "Agent: #{result.agent}" if result.respond_to?(:agent)
         say "Model: #{result.model}" if result.respond_to?(:model)
-        if result.respond_to?(:cost) && result.cost
-          say "Cost: $#{result.cost[:total].round(6)}"
-        end
+        say "Cost: $#{result.cost[:total].round(6)}" if result.respond_to?(:cost) && result.cost
       elsif result.respond_to?(:failed?) && result.failed?
         say "Task failed: #{result.error&.message}", :red
-      else
+      elsif result.respond_to?(:content)
         # Pipeline or parallel result
-        say result.content if result.respond_to?(:content)
+        say result.content
       end
+    end
+
+    def fetch_provider_billing
+      cfg = OrchestraAI.configuration
+
+      api_keys = {
+        openai: cfg.openai_api_key,
+        openai_admin: cfg.openai_admin_key,
+        anthropic: cfg.anthropic_api_key,
+        anthropic_admin: cfg.anthropic_admin_key,
+        google: cfg.google_api_key
+      }
+
+      say 'Provider Usage (from APIs):', :green
+      puts
+
+      results = Costs::BillingFetcher.fetch_all(api_keys)
+
+      results.each do |provider, result|
+        say "#{provider.to_s.capitalize}:", :cyan
+        if result.success?
+          if result.cost_this_month
+            say "  Cost this month: $#{format('%.4f', result.cost_this_month)} #{result.usage_data[:currency]&.upcase}"
+          end
+          if result.total_tokens
+            say "  Tokens this month: #{format_number(result.total_tokens)}"
+            say "    Input: #{format_number(result.usage_data[:input_tokens])}"
+            say "    Output: #{format_number(result.usage_data[:output_tokens])}"
+            # Show Anthropic-specific token breakdowns
+            if result.usage_data[:cached_input_tokens] && result.usage_data[:cached_input_tokens] > 0
+              say "    Cached input: #{format_number(result.usage_data[:cached_input_tokens])}"
+            end
+            if result.usage_data[:cache_creation_tokens] && result.usage_data[:cache_creation_tokens] > 0
+              say "    Cache creation: #{format_number(result.usage_data[:cache_creation_tokens])}"
+            end
+          end
+        else
+          say "  #{result.error_message}", :yellow
+        end
+        puts
+      end
+    end
+
+    def format_number(num)
+      num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
     end
   end
 end

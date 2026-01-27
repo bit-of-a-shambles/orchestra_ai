@@ -76,7 +76,7 @@ class ConversationTest < Minitest::Test
   end
 
   def test_estimated_tokens_calculates_based_on_content_length
-    @conversation.user('Hello world')  # 11 chars / 4 ≈ 2 tokens
+    @conversation.user('Hello world') # 11 chars / 4 ≈ 2 tokens
 
     tokens = @conversation.estimated_tokens
 

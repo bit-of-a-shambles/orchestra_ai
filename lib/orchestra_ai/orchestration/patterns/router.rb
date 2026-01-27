@@ -77,15 +77,15 @@ module OrchestraAI
         # Create a router for code-related tasks
         def self.for_code(**options)
           new.tap do |r|
-            r.route_by_keywords("bug", "fix", "error", "issue") do |task, **opts|
+            r.route_by_keywords('bug', 'fix', 'error', 'issue') do |task, **opts|
               OrchestraAI.implementer.execute(task, **opts.merge(options))
             end
 
-            r.route_by_keywords("design", "architect", "plan", "structure") do |task, **opts|
+            r.route_by_keywords('design', 'architect', 'plan', 'structure') do |task, **opts|
               OrchestraAI.architect.execute(task, **opts.merge(options))
             end
 
-            r.route_by_keywords("review", "check", "audit", "analyse") do |task, **opts|
+            r.route_by_keywords('review', 'check', 'audit', 'analyse') do |task, **opts|
               OrchestraAI.reviewer.execute(task, **opts.merge(options))
             end
 
