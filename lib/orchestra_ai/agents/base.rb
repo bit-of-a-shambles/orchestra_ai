@@ -106,7 +106,7 @@ module OrchestraAI
       end
 
       def select_model(difficulty)
-        config = OrchestraAI.configuration.config
+        config = OrchestraAI.configuration
         model_config = config.models.send(model_config_key)
         thresholds = config.difficulty
 

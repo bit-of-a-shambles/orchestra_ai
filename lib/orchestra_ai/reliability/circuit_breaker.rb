@@ -14,7 +14,7 @@ module OrchestraAI
         failure_threshold: nil,
         reset_timeout: nil
       )
-        config = OrchestraAI.configuration.config.circuit_breaker
+        config = OrchestraAI.configuration.circuit_breaker
         @name = name
         @failure_threshold = failure_threshold || config.failure_threshold
         @reset_timeout = reset_timeout || config.reset_timeout

@@ -3,6 +3,13 @@
 require "zeitwerk"
 
 loader = Zeitwerk::Loader.for_gem
+loader.inflector.inflect(
+  "orchestra_ai" => "OrchestraAI",
+  "openai" => "OpenAI"
+)
+loader.ignore("#{__dir__}/orchestra_ai/errors.rb")
+loader.ignore("#{__dir__}/orchestra_ai/version.rb")
+loader.ignore("#{__dir__}/orchestra_ai/configuration.rb")
 loader.setup
 
 require_relative "orchestra_ai/version"
@@ -58,7 +65,7 @@ module OrchestraAI
     end
 
     def logger
-      configuration.config.logger || default_logger
+      configuration.logger || default_logger
     end
 
     private
@@ -66,7 +73,7 @@ module OrchestraAI
     def default_logger
       @default_logger ||= begin
         require "logger"
-        Logger.new($stdout, level: configuration.config.log_level)
+        Logger.new($stdout, level: configuration.log_level)
       end
     end
   end

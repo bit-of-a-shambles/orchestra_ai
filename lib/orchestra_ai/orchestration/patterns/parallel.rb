@@ -11,8 +11,8 @@ module OrchestraAI
         def initialize(tasks, agent: nil, max_threads: nil, timeout: nil)
           @tasks = Array(tasks)
           @agent = agent
-          @max_threads = max_threads || OrchestraAI.configuration.config.parallel.max_threads
-          @timeout = timeout || OrchestraAI.configuration.config.parallel.timeout
+          @max_threads = max_threads || OrchestraAI.configuration.parallel.max_threads
+          @timeout = timeout || OrchestraAI.configuration.parallel.timeout
           @results = []
         end
 

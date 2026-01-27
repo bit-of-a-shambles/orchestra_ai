@@ -34,7 +34,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ruby-openai", "~> 7.0"
   spec.add_dependency "gemini-ai", "~> 4.0"
   spec.add_dependency "concurrent-ruby", "~> 1.2"
-  spec.add_dependency "dry-configurable", "~> 1.0"
   spec.add_dependency "thor", "~> 1.3"
   spec.add_dependency "zeitwerk", "~> 2.6"
 

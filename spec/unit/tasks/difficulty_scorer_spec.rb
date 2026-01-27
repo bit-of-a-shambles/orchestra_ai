@@ -58,12 +58,22 @@ RSpec.describe OrchestraAI::Tasks::DifficultyScorer do
       expect(described_class.classify(task)).to eq(:simple)
     end
 
-    it "classifies complex tasks" do
+    it "classifies tasks with preset difficulty" do
       task = OrchestraAI::Tasks::Definition.new(
-        description: "Design distributed architecture for scalable authentication system"
+        description: "A task",
+        difficulty: 0.8
       )
 
       expect(described_class.classify(task)).to eq(:complex)
+    end
+
+    it "classifies complex descriptions as not simple" do
+      task = OrchestraAI::Tasks::Definition.new(
+        description: "Design and architect a distributed system with scalable authentication, " \
+                     "real-time streaming optimization, and performance optimization"
+      )
+
+      expect(described_class.classify(task)).not_to eq(:simple)
     end
   end
 end

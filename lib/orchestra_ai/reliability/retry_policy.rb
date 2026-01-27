@@ -18,7 +18,7 @@ module OrchestraAI
         max_delay: nil,
         multiplier: nil
       )
-        config = OrchestraAI.configuration.config.retry
+        config = OrchestraAI.configuration.retry_config
         @max_attempts = max_attempts || config.max_attempts
         @base_delay = base_delay || config.base_delay
         @max_delay = max_delay || config.max_delay

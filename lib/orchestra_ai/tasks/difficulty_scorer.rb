@@ -63,7 +63,7 @@ module OrchestraAI
         # Quick classification into tiers
         def classify(task)
           score = score(task)
-          thresholds = OrchestraAI.configuration.config.difficulty
+          thresholds = OrchestraAI.configuration.difficulty
 
           if score < thresholds.simple_threshold
             :simple

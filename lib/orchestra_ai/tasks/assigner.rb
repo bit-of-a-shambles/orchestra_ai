@@ -73,7 +73,7 @@ module OrchestraAI
         private
 
         def select_model(agent, tier)
-          config = OrchestraAI.configuration.config
+          config = OrchestraAI.configuration
           model_config = config.models.send(agent)
           model_config.send(tier)
         end
