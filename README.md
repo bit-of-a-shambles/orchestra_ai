@@ -305,9 +305,37 @@ orchestra models
 # Show current configuration
 orchestra config
 
+# Show MCP/Coding CLI/Copilot readiness
+orchestra dev
+
+# Bootstrap .mcp.json and Copilot instructions if missing
+orchestra dev --write
+
 # Show version
 orchestra version
 ```
+
+### MCP + Coding CLI + Copilot Acceleration
+
+OrchestraAI can reduce token usage by using local coding CLIs for code-oriented tasks, adding MCP context to prompts, and reusing repository-level Copilot instructions.
+
+Enable it with environment variables:
+
+```bash
+export ORCHESTRA_DEV_ACCELERATION=true
+
+# Optional: run an MCP command and inject output into prompts (supports %TASK%)
+export ORCHESTRA_MCP_CONTEXT_COMMAND='mcporter call myserver.get_context task=%TASK% --output json'
+
+# Optional: choose local coding CLI order and roles
+export ORCHESTRA_CODING_CLI_ORDER='codex,opencode,pi,claude'
+export ORCHESTRA_CODING_CLI_ROLES='implementer,reviewer'
+```
+
+When enabled:
+- Implementer/reviewer can use local coding CLIs first for code tasks.
+- MCP context output is injected into task messages when configured.
+- `.github/copilot-instructions.md` is appended to system prompts when present.
 
 ## Ruby API
 
@@ -687,4 +715,3 @@ bundle exec rake test
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
-

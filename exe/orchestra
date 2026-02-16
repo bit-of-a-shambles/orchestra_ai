@@ -176,6 +176,43 @@ module OrchestraAI
       fetch_provider_billing
     end
 
+    desc 'dev', 'Show MCP/Coding CLI/Copilot acceleration status'
+    option :write, type: :boolean, default: false,
+                   desc: 'Create .mcp.json and Copilot instructions file if missing'
+    def dev
+      configure_from_env
+      report = Development::Toolchain.status_report(workdir: Dir.pwd)
+
+      say 'Development Acceleration:', :green
+      say "  Enabled: #{report[:enabled]}"
+      puts
+
+      say 'MCP:', :cyan
+      say "  mcporter CLI: #{status_badge(report[:mcporter_available])}"
+      say "  MCP context command configured: #{status_badge(report[:mcp_command_configured])}"
+      puts
+
+      say 'Coding CLIs:', :cyan
+      say "  Available: #{report[:available_clis].join(', ')}" if report[:available_clis].any?
+      say "  Missing: #{report[:missing_clis].join(', ')}" if report[:missing_clis].any?
+      puts
+
+      say 'GitHub Copilot:', :cyan
+      say "  Instructions file: #{report[:copilot_path]}"
+      say "  Present: #{status_badge(report[:copilot_present])}"
+      puts
+
+      return unless options[:write]
+
+      created = Development::Toolchain.bootstrap!(workdir: Dir.pwd)
+      if created.empty?
+        say 'No files created (already present).', :yellow
+      else
+        say 'Created:', :green
+        created.each { |path| say "  - #{path}" }
+      end
+    end
+
     desc 'version', 'Show version'
     def version
       say "OrchestraAI #{OrchestraAI::VERSION}"
@@ -276,6 +313,10 @@ module OrchestraAI
 
     def format_number(num)
       num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+    end
+
+    def status_badge(ok)
+      ok ? '[ok]' : '[missing]'
     end
   end
 end

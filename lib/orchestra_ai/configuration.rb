@@ -15,7 +15,7 @@ module OrchestraAI
     attr_accessor :logger, :log_level
 
     # Nested config objects
-    attr_reader :models, :difficulty, :retry_config, :circuit_breaker, :parallel, :budget
+    attr_reader :models, :difficulty, :retry_config, :circuit_breaker, :parallel, :budget, :development
 
     def initialize
       @anthropic_api_key = ENV.fetch('ANTHROPIC_API_KEY', nil)
@@ -33,6 +33,7 @@ module OrchestraAI
       @circuit_breaker = CircuitBreakerConfig.new
       @parallel = ParallelConfig.new
       @budget = BudgetConfig.new
+      @development = DevelopmentConfig.new
     end
 
     def validate!
@@ -157,6 +158,53 @@ module OrchestraAI
 
       def to_budget
         Costs::Budget.new(limits: @limits, alert_threshold: @alert_threshold)
+      end
+    end
+
+    class DevelopmentConfig
+      attr_accessor :enabled, :mcp_enabled, :mcp_context_command, :mcp_timeout, :mcp_context_max_chars,
+                    :copilot_instructions_enabled, :copilot_instructions_path, :copilot_instructions_max_chars,
+                    :coding_cli_enabled, :coding_cli_timeout
+      attr_reader :coding_cli_order, :coding_cli_roles
+
+      def initialize
+        @enabled = ENV.fetch('ORCHESTRA_DEV_ACCELERATION', 'false') == 'true'
+        @mcp_enabled = ENV.fetch('ORCHESTRA_MCP_ENABLED', 'true') != 'false'
+        @mcp_context_command = ENV.fetch('ORCHESTRA_MCP_CONTEXT_COMMAND', nil)
+        @mcp_timeout = ENV.fetch('ORCHESTRA_MCP_TIMEOUT', '5').to_i
+        @mcp_context_max_chars = ENV.fetch('ORCHESTRA_MCP_CONTEXT_MAX_CHARS', '4000').to_i
+
+        @copilot_instructions_enabled = ENV.fetch('ORCHESTRA_COPILOT_INSTRUCTIONS_ENABLED', 'true') != 'false'
+        @copilot_instructions_path = ENV.fetch('ORCHESTRA_COPILOT_INSTRUCTIONS_PATH',
+                                               '.github/copilot-instructions.md')
+        @copilot_instructions_max_chars = ENV.fetch('ORCHESTRA_COPILOT_INSTRUCTIONS_MAX_CHARS', '4000').to_i
+
+        @coding_cli_enabled = ENV.fetch('ORCHESTRA_CODING_CLI_ENABLED', 'true') != 'false'
+        @coding_cli_timeout = ENV.fetch('ORCHESTRA_CODING_CLI_TIMEOUT', '120').to_i
+        @coding_cli_order = parse_cli_list(ENV.fetch('ORCHESTRA_CODING_CLI_ORDER', 'codex,opencode,pi,claude'))
+        @coding_cli_roles = parse_role_list(ENV.fetch('ORCHESTRA_CODING_CLI_ROLES', 'implementer,reviewer'))
+      end
+
+      def coding_cli_order=(list)
+        @coding_cli_order = parse_cli_list(list)
+      end
+
+      def coding_cli_roles=(list)
+        @coding_cli_roles = parse_role_list(list)
+      end
+
+      def role_enabled?(role)
+        @coding_cli_roles.include?(role.to_sym)
+      end
+
+      private
+
+      def parse_cli_list(list)
+        Array(list).join(',').split(',').map { |v| v.strip.downcase }.reject(&:empty?).uniq
+      end
+
+      def parse_role_list(list)
+        Array(list).join(',').split(',').map { |v| v.strip.downcase.to_sym }.reject(&:empty?).uniq
       end
     end
   end

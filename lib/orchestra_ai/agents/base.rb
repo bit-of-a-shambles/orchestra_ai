@@ -14,6 +14,9 @@ module OrchestraAI
       # @param options [Hash] Additional options (temperature, max_tokens, etc.)
       # @return [Tasks::Result] The execution result
       def execute(task, **options)
+        local_result = Development::Toolchain.try_local_cli(task: task, role: role)
+        return local_result if local_result
+
         provider = get_provider_for_task(task)
         messages = build_messages(task)
 
@@ -86,7 +89,13 @@ module OrchestraAI
       end
 
       def build_messages(task)
-        messages = [{ role: "system", content: system_prompt }]
+        messages = [{ role: "system", content: system_prompt_with_copilot }]
+
+        mcp_context = Development::Toolchain.mcp_context(task: task)
+        if mcp_context
+          messages << { role: "user", content: "MCP context:\n#{mcp_context}" }
+          messages << { role: "assistant", content: "I will use the MCP context where relevant." }
+        end
 
         # Add context from previous results if available
         if task.context&.any?
@@ -97,6 +106,18 @@ module OrchestraAI
 
         messages << { role: "user", content: task.description }
         messages
+      end
+
+      def system_prompt_with_copilot
+        copilot_instructions = Development::Toolchain.copilot_instructions
+        return system_prompt unless copilot_instructions
+
+        <<~PROMPT
+          #{system_prompt}
+
+          Repository Copilot instructions:
+          #{copilot_instructions}
+        PROMPT
       end
 
       def get_provider_for_task(task)

@@ -125,6 +125,25 @@ class AgentExecutionTest < Minitest::Test
     end
   end
 
+  def test_execute_uses_local_cli_when_available
+    agent = OrchestraAI::Agents::Implementer.new
+    local_result = OrchestraAI::Tasks::Result.new(
+      content: 'Local CLI output',
+      task: @task,
+      agent: :implementer,
+      model: 'local-cli:codex',
+      usage: {}
+    )
+
+    OrchestraAI::Development::Toolchain.stub(:try_local_cli, local_result) do
+      result = agent.execute(@task)
+
+      assert result.success?
+      assert_equal 'Local CLI output', result.content
+      assert_equal 'local-cli:codex', result.model
+    end
+  end
+
   def test_execute_handles_errors_gracefully
     agent = OrchestraAI::Agents::Implementer.new
     error_provider = OrchestraAI::Testing::MockProvider.new(responses: [])
@@ -252,6 +271,34 @@ class AgentExecutionTest < Minitest::Test
       messages = @mock_provider.last_call[:messages]
       user_message = messages.find { |m| m[:role] == 'user' && m[:content].include?('Test task') }
       refute_nil user_message
+    end
+  end
+
+  def test_build_messages_adds_mcp_context_when_available
+    agent = OrchestraAI::Agents::Implementer.new
+
+    OrchestraAI::Development::Toolchain.stub(:mcp_context, 'Relevant MCP data') do
+      OrchestraAI::Providers::Registry.stub(:create_for_model, @mock_provider) do
+        agent.execute(@task)
+
+        messages = @mock_provider.last_call[:messages]
+        mcp_message = messages.find { |m| m[:content].include?('Relevant MCP data') }
+        refute_nil mcp_message
+      end
+    end
+  end
+
+  def test_system_prompt_includes_copilot_instructions_when_available
+    agent = OrchestraAI::Agents::Implementer.new
+
+    OrchestraAI::Development::Toolchain.stub(:copilot_instructions, 'Keep patches small') do
+      OrchestraAI::Providers::Registry.stub(:create_for_model, @mock_provider) do
+        agent.execute(@task)
+
+        messages = @mock_provider.last_call[:messages]
+        system_message = messages.find { |m| m[:role] == 'system' }
+        assert_includes system_message[:content], 'Keep patches small'
+      end
     end
   end
 

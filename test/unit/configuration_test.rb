@@ -64,4 +64,14 @@ class ConfigurationTest < Minitest::Test
 
     refute config.provider_available?(:unknown_provider)
   end
+
+  def test_has_default_development_settings
+    config = OrchestraAI::Configuration.new
+
+    refute config.development.enabled
+    assert config.development.coding_cli_enabled
+    assert config.development.copilot_instructions_enabled
+    assert_equal %w[codex opencode pi claude], config.development.coding_cli_order
+    assert_equal %i[implementer reviewer], config.development.coding_cli_roles
+  end
 end

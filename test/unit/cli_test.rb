@@ -150,6 +150,16 @@ class CLITest < Minitest::Test
     assert_match(/Total spent:/, output[:stdout])
   end
 
+  # -- Runtime tests for dev command --
+
+  def test_dev_command_shows_development_acceleration_section
+    output = capture_output { OrchestraAI::CLI.new.invoke(:dev, [], {}) }
+    assert_match(/Development Acceleration:/, output[:stdout])
+    assert_match(/MCP:/, output[:stdout])
+    assert_match(/Coding CLIs:/, output[:stdout])
+    assert_match(/GitHub Copilot:/, output[:stdout])
+  end
+
   # -- CLI helper method tests --
 
   def test_get_agent_returns_architect
@@ -230,6 +240,7 @@ class CLITest < Minitest::Test
     assert_includes commands, 'score'
     assert_includes commands, 'budget'
     assert_includes commands, 'usage'
+    assert_includes commands, 'dev'
     assert_includes commands, 'version'
   end
 
@@ -246,6 +257,12 @@ class CLITest < Minitest::Test
     cmd = OrchestraAI::CLI.commands['budget']
     assert cmd.options.key?(:fetch)
     assert_equal false, cmd.options[:fetch].default
+  end
+
+  def test_dev_command_has_write_option
+    cmd = OrchestraAI::CLI.commands['dev']
+    assert cmd.options.key?(:write)
+    assert_equal false, cmd.options[:write].default
   end
 
   def test_cli_exits_on_failure
@@ -282,6 +299,12 @@ class CLITest < Minitest::Test
     content = File.read(@exe_path)
     assert_match(/desc ['"]version['"]/, content,
                  'CLI should have version command')
+  end
+
+  def test_cli_has_dev_command_in_file
+    content = File.read(@exe_path)
+    assert_match(/desc ['"]dev['"]/, content,
+                 'CLI should have dev command')
   end
 
   def test_cli_starts_thor
