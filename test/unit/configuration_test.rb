@@ -9,8 +9,8 @@ class ConfigurationTest < Minitest::Test
     config = OrchestraAI::Configuration.new
 
     assert_equal 'gemini-2.5-flash', config.models.architect.simple
-    assert_equal 'gpt-5.2-codex', config.models.architect.moderate
-    assert_equal 'claude-opus-4.5', config.models.architect.complex
+    assert_equal 'gpt-5.4', config.models.architect.moderate
+    assert_equal 'claude-opus-4.6', config.models.architect.complex
   end
 
   def test_has_default_difficulty_thresholds

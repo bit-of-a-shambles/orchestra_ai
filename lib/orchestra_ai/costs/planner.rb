@@ -8,9 +8,9 @@ module OrchestraAI
 
       # Alternative models ranked by cost (cheapest first) per provider
       ALTERNATIVES = {
-        google: %w[gemini-2.5-flash-lite gemini-2.5-flash gemini-3-flash gemini-2.5-pro gemini-3-pro],
-        openai: %w[gpt-5-nano gpt-5-mini gpt-4.1 o4-mini gpt-5.2-codex],
-        anthropic: %w[claude-haiku-4.5 claude-sonnet-4.5 claude-opus-4.5]
+        google: %w[gemini-2.5-flash-lite gemini-2.5-flash gemini-3-flash-preview gemini-2.5-pro gemini-3.1-pro-preview],
+        openai: %w[gpt-5-nano gpt-5-mini gpt-4.1 o4-mini gpt-5.4],
+        anthropic: %w[claude-haiku-4.5 claude-sonnet-4.6 claude-opus-4.6]
       }.freeze
 
       attr_reader :budget, :estimator
@@ -215,8 +215,8 @@ module OrchestraAI
       end
 
       def calculate_premium_comparison(task)
-        # Estimate cost if using only claude-opus-4.5 (most expensive)
-        premium_model = 'claude-opus-4.5'
+        # Estimate cost if using only claude-opus-4.6 (most expensive)
+        premium_model = 'claude-opus-4.6'
         stages = %i[architect implementer reviewer]
 
         premium_estimate = @estimator.estimate_pipeline(

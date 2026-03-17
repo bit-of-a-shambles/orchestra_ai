@@ -8,12 +8,12 @@ A simple AI agent orchestrator with role-based execution, parallel processing, t
 
 ### Cost Savings
 
-Using only Claude Opus 4 for everything is expensive. OrchestraAI automatically routes tasks to the most cost-effective model:
+Using only Claude Opus 4.6 for everything is expensive. OrchestraAI automatically routes tasks to the most cost-effective model:
 
 | Scenario | Model | Cost per 1M tokens | 100 tasks (avg 2K tokens) |
 |----------|-------|-------------------|---------------------------|
-| **All Opus** | claude-opus-4 | $15.00 input / $75.00 output | **~$18.00** |
-| **OrchestraAI** | Mixed (70% simple, 25% moderate, 5% complex) | Weighted average | **~$1.80** |
+| **All Opus** | claude-opus-4.6 | $5.00 input / $25.00 output | **~$6.00** |
+| **OrchestraAI** | Mixed (70% simple, 25% moderate, 5% complex) | Weighted average | **~$0.60** |
 
 **Up to 90% cost reduction** by intelligently routing simple tasks to cheaper models while reserving expensive models for truly complex work.
 
@@ -70,9 +70,9 @@ The **Pipeline pattern** ensures quality through staged review, while **Parallel
               │                      │                      │
               ▼                      ▼                      ▼
       ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-      │ gemini-2.5   │      │  gpt-5-codex │      │ claude-opus-4│
+      │ gemini-2.5   │      │   gpt-5.4    │      │claude-opus-4.6│
       │    flash     │      │              │      │              │
-      │  $0.10/1M    │      │   $2.50/1M   │      │  $5.00/1M    │
+      │  $0.30/1M    │      │  $15.00/1M   │      │  $25.00/1M   │
       └──────────────┘      └──────────────┘      └──────────────┘
 
 
@@ -431,9 +431,9 @@ result = router.execute(task)
 
 | Role | Simple (< 0.33) | Moderate (0.33-0.66) | Complex (> 0.66) |
 |------|-----------------|----------------------|------------------|
-| Architect | gemini-2.5-flash | gpt-5-codex | claude-opus-4 |
-| Implementer | gemini-2.5-flash | gemini-2.5-flash | gpt-5-codex |
-| Reviewer | gemini-2.5-flash | gpt-5-codex | claude-opus-4 |
+| Architect | gemini-2.5-flash | gpt-5.4 | claude-opus-4.6 |
+| Implementer | gemini-2.5-flash | gemini-2.5-flash | gpt-5.4 |
+| Reviewer | gemini-2.5-flash | gpt-5.4 | claude-opus-4.6 |
 
 ## Cost Planning & Budget Management
 
@@ -541,7 +541,7 @@ puts conductor.tracker.cost_by_provider
 # { anthropic: 0.0023, openai: 0.0015, google: 0.0008 }
 
 puts conductor.tracker.cost_by_model
-# { "claude-sonnet-4" => 0.0023, "gpt-5-codex" => 0.0015, "gemini-2.5-flash" => 0.0008 }
+# { "claude-sonnet-4.6" => 0.0023, "gpt-5.4" => 0.0015, "gemini-2.5-flash" => 0.0008 }
 
 puts conductor.tracker.cost_by_agent
 # { architect: 0.001, implementer: 0.002, reviewer: 0.001 }
@@ -569,7 +569,7 @@ Or get detailed savings data:
 report = conductor.savings_report
 
 report[:actual_cost]       # What you actually spent
-report[:premium_cost]      # What it would cost with claude-opus-4.5 only
+report[:premium_cost]      # What it would cost with claude-opus-4.6 only
 report[:savings]           # Absolute savings
 report[:savings_percentage] # Percentage saved
 report[:task_count]        # Number of tasks tracked

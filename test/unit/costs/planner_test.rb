@@ -234,7 +234,7 @@ class ExecutionPlanTest < Minitest::Test
       warnings: [],
       alternatives: nil,
       premium_comparison: {
-        premium_model: 'claude-opus-4.5',
+        premium_model: 'claude-opus-4.6',
         premium_cost: { input: 0.01, output: 0.02, total: 0.03 },
         premium_stages: %i[architect implementer reviewer]
       }
@@ -293,7 +293,7 @@ class ExecutionPlanTest < Minitest::Test
   end
 
   def test_premium_comparison_accessor
-    assert_equal 'claude-opus-4.5', @plan.premium_comparison[:premium_model]
+    assert_equal 'claude-opus-4.6', @plan.premium_comparison[:premium_model]
   end
 
   # Sufficiency query methods tests

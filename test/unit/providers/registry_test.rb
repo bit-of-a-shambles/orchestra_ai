@@ -34,7 +34,7 @@ class RegistryTest < Minitest::Test
   end
 
   def test_for_model_returns_ruby_llm_provider_for_claude
-    provider_class = OrchestraAI::Providers::Registry.for_model('claude-opus-4.5')
+    provider_class = OrchestraAI::Providers::Registry.for_model('claude-opus-4.6')
 
     assert_equal OrchestraAI::Providers::RubyLLMProvider, provider_class
   end
@@ -93,10 +93,10 @@ class RegistryTest < Minitest::Test
     models = OrchestraAI::Providers::Registry.all_models
 
     assert_instance_of Array, models
-    assert_includes models, 'claude-opus-4.5'
+    assert_includes models, 'claude-opus-4.6'
     assert_includes models, 'gpt-4.1'
     assert_includes models, 'gemini-2.5-flash'
-    assert_includes models, 'gpt-5.2-codex'
+    assert_includes models, 'gpt-5.4'
   end
 
   def test_models_for_provider_returns_provider_specific_models
@@ -112,7 +112,7 @@ class RegistryTest < Minitest::Test
   end
 
   def test_model_available_returns_true_for_configured_provider
-    available = OrchestraAI::Providers::Registry.model_available?('claude-opus-4.5')
+    available = OrchestraAI::Providers::Registry.model_available?('claude-opus-4.6')
 
     assert available
   end

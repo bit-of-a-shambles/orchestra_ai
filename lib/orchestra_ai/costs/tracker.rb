@@ -4,7 +4,7 @@ module OrchestraAI
   module Costs
     # Tracks costs across a session and provides savings reports
     class Tracker
-      PREMIUM_MODEL = 'claude-opus-4.5'
+      PREMIUM_MODEL = 'claude-opus-4.6'
 
       attr_reader :results, :budget
 

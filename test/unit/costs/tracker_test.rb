@@ -28,7 +28,7 @@ class TrackerTest < Minitest::Test
 
   # Premium model constant
   def test_premium_model_constant
-    assert_equal 'claude-opus-4.5', OrchestraAI::Costs::Tracker::PREMIUM_MODEL
+    assert_equal 'claude-opus-4.6', OrchestraAI::Costs::Tracker::PREMIUM_MODEL
   end
 
   # Record tests
@@ -229,7 +229,7 @@ class TrackerTest < Minitest::Test
 
     premium_cost = @tracker.premium_equivalent_cost
 
-    # Should be higher than actual cost (claude-opus-4.5 is $5/$25 per 1M vs gemini at $0.10/$0.40)
+    # Should be higher than actual cost (claude-opus-4.6 is $5/$25 per 1M vs gemini at $0.10/$0.40)
     assert premium_cost > @tracker.total_cost
   end
 
@@ -340,7 +340,7 @@ class TrackerTest < Minitest::Test
 
   def test_savings_summary_includes_premium_equivalent
     assert_includes @tracker.savings_summary, 'Premium Equivalent'
-    assert_includes @tracker.savings_summary, 'claude-opus-4.5'
+    assert_includes @tracker.savings_summary, 'claude-opus-4.6'
   end
 
   def test_savings_summary_includes_savings

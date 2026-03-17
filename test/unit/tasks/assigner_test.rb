@@ -88,10 +88,10 @@ class AssignerTest < Minitest::Test
   def test_estimate_cost_with_explicit_model
     task = OrchestraAI::Tasks::Definition.new(description: 'Task')
 
-    estimate = OrchestraAI::Tasks::Assigner.estimate_cost(task, model: 'claude-opus-4.5')
+    estimate = OrchestraAI::Tasks::Assigner.estimate_cost(task, model: 'claude-opus-4.6')
 
     refute_nil estimate
-    assert_equal 'claude-opus-4.5', estimate[:model]
+    assert_equal 'claude-opus-4.6', estimate[:model]
   end
 
   def test_estimate_cost_includes_context_in_calculation

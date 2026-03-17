@@ -237,7 +237,7 @@ class EstimatorTest < Minitest::Test
   # Cost for tokens tests
   def test_cost_for_tokens_calculates_correctly
     result = @estimator.cost_for_tokens(
-      'claude-opus-4.5',
+      'claude-opus-4.6',
       input_tokens: 1_000_000,
       output_tokens: 1_000_000
     )
@@ -254,9 +254,9 @@ class EstimatorTest < Minitest::Test
       output_tokens: 500
     )
 
-    # $0.10/1M input, $0.40/1M output
-    assert_in_delta 0.0001, result[:input], 0.00001
-    assert_in_delta 0.0002, result[:output], 0.00001
+    # $0.30/1M input, $2.50/1M output
+    assert_in_delta 0.0003, result[:input], 0.00001
+    assert_in_delta 0.00125, result[:output], 0.00001
   end
 
   def test_cost_for_tokens_with_unknown_model
@@ -271,7 +271,7 @@ class EstimatorTest < Minitest::Test
 
   # Provider for model tests
   def test_provider_for_model_anthropic
-    assert_equal :anthropic, @estimator.provider_for_model('claude-opus-4.5')
+    assert_equal :anthropic, @estimator.provider_for_model('claude-opus-4.6')
   end
 
   def test_provider_for_model_openai

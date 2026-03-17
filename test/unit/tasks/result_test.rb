@@ -20,14 +20,14 @@ class ResultTest < Minitest::Test
       content: 'Success content',
       task: @task,
       agent: :architect,
-      model: 'claude-opus-4.5'
+      model: 'claude-opus-4.6'
     )
 
     assert result.success?
     refute result.failed?
     assert_equal 'Success content', result.content
     assert_equal :architect, result.agent
-    assert_equal 'claude-opus-4.5', result.model
+    assert_equal 'claude-opus-4.6', result.model
   end
 
   def test_failed_result_with_error
@@ -154,7 +154,7 @@ class ResultTest < Minitest::Test
       content: 'Test',
       task: @task,
       agent: :architect,
-      model: 'claude-opus-4.5'
+      model: 'claude-opus-4.6'
     )
 
     assert_nil result.cost
@@ -165,7 +165,7 @@ class ResultTest < Minitest::Test
       content: 'Test',
       task: @task,
       agent: :architect,
-      model: 'claude-opus-4.5',
+      model: 'claude-opus-4.6',
       usage: { input_tokens: 1_000_000, output_tokens: 1_000_000 }
     )
 

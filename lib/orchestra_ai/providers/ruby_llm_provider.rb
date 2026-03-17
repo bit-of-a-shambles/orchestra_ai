@@ -9,22 +9,22 @@ module OrchestraAI
       # Model pricing per 1M tokens (input/output)
       MODELS = {
         # Google Gemini
-        'gemini-3-pro' => { input: 1.25, output: 10.00, context: 1_000_000, provider: :gemini },
-        'gemini-3-flash' => { input: 0.15, output: 0.60, context: 1_000_000, provider: :gemini },
-        'gemini-2.5-flash' => { input: 0.10, output: 0.40, context: 1_000_000, provider: :gemini },
-        'gemini-2.5-flash-lite' => { input: 0.02, output: 0.10, context: 1_000_000, provider: :gemini },
+        'gemini-3.1-pro-preview' => { input: 2.00, output: 12.00, context: 1_000_000, provider: :gemini },
+        'gemini-3-flash-preview' => { input: 0.50, output: 3.00, context: 1_000_000, provider: :gemini },
+        'gemini-2.5-flash' => { input: 0.30, output: 2.50, context: 1_000_000, provider: :gemini },
+        'gemini-2.5-flash-lite' => { input: 0.10, output: 0.40, context: 1_000_000, provider: :gemini },
         'gemini-2.5-pro' => { input: 1.25, output: 10.00, context: 1_000_000, provider: :gemini },
 
         # OpenAI GPT-5 family
-        'gpt-5.2-codex' => { input: 2.50, output: 10.00, context: 200_000, provider: :openai },
-        'gpt-5-mini' => { input: 0.30, output: 1.20, context: 128_000, provider: :openai },
-        'gpt-5-nano' => { input: 0.10, output: 0.40, context: 128_000, provider: :openai },
-        'gpt-4.1' => { input: 2.00, output: 8.00, context: 128_000, provider: :openai },
+        'gpt-5.4' => { input: 2.50, output: 15.00, context: 1_000_000, provider: :openai },
+        'gpt-5-mini' => { input: 0.25, output: 2.00, context: 400_000, provider: :openai },
+        'gpt-5-nano' => { input: 0.05, output: 0.40, context: 400_000, provider: :openai },
+        'gpt-4.1' => { input: 2.00, output: 8.00, context: 1_000_000, provider: :openai },
         'o4-mini' => { input: 1.10, output: 4.40, context: 200_000, provider: :openai },
 
-        # Anthropic Claude 4.5
-        'claude-opus-4.5' => { input: 5.00, output: 25.00, context: 200_000, provider: :anthropic },
-        'claude-sonnet-4.5' => { input: 3.00, output: 15.00, context: 200_000, provider: :anthropic },
+        # Anthropic Claude 4.6
+        'claude-opus-4.6' => { input: 5.00, output: 25.00, context: 200_000, provider: :anthropic },
+        'claude-sonnet-4.6' => { input: 3.00, output: 15.00, context: 200_000, provider: :anthropic },
         'claude-haiku-4.5' => { input: 1.00, output: 5.00, context: 200_000, provider: :anthropic }
       }.freeze
 

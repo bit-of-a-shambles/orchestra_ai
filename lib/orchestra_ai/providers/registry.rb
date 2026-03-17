@@ -6,22 +6,22 @@ module OrchestraAI
       # All models now use the unified RubyLLM provider
       MODEL_TO_PROVIDER = {
         # Google Gemini models
-        'gemini-3-pro' => :google,
-        'gemini-3-flash' => :google,
+        'gemini-3.1-pro-preview' => :google,
+        'gemini-3-flash-preview' => :google,
         'gemini-2.5-flash' => :google,
         'gemini-2.5-flash-lite' => :google,
         'gemini-2.5-pro' => :google,
 
         # OpenAI GPT-5 family models
-        'gpt-5.2-codex' => :openai,
+        'gpt-5.4' => :openai,
         'gpt-5-mini' => :openai,
         'gpt-5-nano' => :openai,
         'gpt-4.1' => :openai,
         'o4-mini' => :openai,
 
-        # Anthropic Claude 4.5 models
-        'claude-opus-4.5' => :anthropic,
-        'claude-sonnet-4.5' => :anthropic,
+        # Anthropic Claude models
+        'claude-opus-4.6' => :anthropic,
+        'claude-sonnet-4.6' => :anthropic,
         'claude-haiku-4.5' => :anthropic
       }.freeze
 
