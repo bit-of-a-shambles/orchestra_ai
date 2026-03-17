@@ -10,7 +10,8 @@ module OrchestraAI
       ALTERNATIVES = {
         google: %w[gemini-2.5-flash-lite gemini-2.5-flash gemini-3-flash-preview gemini-2.5-pro gemini-3.1-pro-preview],
         openai: %w[gpt-5-nano gpt-5-mini gpt-4.1 o4-mini gpt-5.4],
-        anthropic: %w[claude-haiku-4.5 claude-sonnet-4.6 claude-opus-4.6]
+        anthropic: %w[claude-haiku-4.5 claude-sonnet-4.6 claude-opus-4.6],
+        mistral: %w[mistral-small-latest mistral-medium-latest mistral-large-latest]
       }.freeze
 
       attr_reader :budget, :estimator

@@ -22,7 +22,12 @@ module OrchestraAI
         # Anthropic Claude models
         'claude-opus-4.6' => :anthropic,
         'claude-sonnet-4.6' => :anthropic,
-        'claude-haiku-4.5' => :anthropic
+        'claude-haiku-4.5' => :anthropic,
+
+        # Mistral models
+        'mistral-small-latest' => :mistral,
+        'mistral-medium-latest' => :mistral,
+        'mistral-large-latest' => :mistral
       }.freeze
 
       class << self
@@ -49,7 +54,7 @@ module OrchestraAI
         end
 
         def available_providers
-          %i[anthropic openai google].select do |provider|
+          %i[anthropic openai google mistral].select do |provider|
             OrchestraAI.configuration.provider_available?(provider)
           end
         end

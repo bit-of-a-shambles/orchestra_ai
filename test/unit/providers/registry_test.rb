@@ -130,4 +130,38 @@ class RegistryTest < Minitest::Test
     assert_includes providers, :openai
     assert_includes providers, :google
   end
+
+  def test_mistral_models_are_registered
+    assert_includes OrchestraAI::Providers::Registry.all_models, 'mistral-small-latest'
+    assert_includes OrchestraAI::Providers::Registry.all_models, 'mistral-medium-latest'
+    assert_includes OrchestraAI::Providers::Registry.all_models, 'mistral-large-latest'
+  end
+
+  def test_mistral_models_map_to_mistral_provider
+    assert_equal :mistral, OrchestraAI::Providers::Registry.provider_for_model('mistral-small-latest')
+    assert_equal :mistral, OrchestraAI::Providers::Registry.provider_for_model('mistral-medium-latest')
+    assert_equal :mistral, OrchestraAI::Providers::Registry.provider_for_model('mistral-large-latest')
+  end
+
+  def test_for_model_returns_ruby_llm_provider_for_mistral
+    provider_class = OrchestraAI::Providers::Registry.for_model('mistral-small-latest')
+
+    assert_equal OrchestraAI::Providers::RubyLLMProvider, provider_class
+  end
+
+  def test_available_providers_includes_mistral_when_key_set
+    OrchestraAI.configure do |c|
+      c.mistral_api_key = 'test-mistral-key'
+    end
+
+    assert_includes OrchestraAI::Providers::Registry.available_providers, :mistral
+  end
+
+  def test_available_providers_excludes_mistral_when_no_key
+    OrchestraAI.configure do |c|
+      c.mistral_api_key = nil
+    end
+
+    refute_includes OrchestraAI::Providers::Registry.available_providers, :mistral
+  end
 end

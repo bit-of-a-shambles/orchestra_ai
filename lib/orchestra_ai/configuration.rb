@@ -3,7 +3,7 @@
 module OrchestraAI
   class Configuration
     # API Keys
-    attr_accessor :anthropic_api_key, :openai_api_key, :google_api_key
+    attr_accessor :anthropic_api_key, :openai_api_key, :google_api_key, :mistral_api_key
 
     # Admin API Keys (for billing/usage APIs)
     attr_accessor :anthropic_admin_key, :openai_admin_key
@@ -21,6 +21,7 @@ module OrchestraAI
       @anthropic_api_key = ENV.fetch('ANTHROPIC_API_KEY', nil)
       @openai_api_key = ENV.fetch('OPENAI_API_KEY', nil)
       @google_api_key = ENV.fetch('GOOGLE_API_KEY', nil)
+      @mistral_api_key = ENV.fetch('MISTRAL_API_KEY', nil)
       @anthropic_admin_key = ENV.fetch('ANTHROPIC_ADMIN_KEY', nil)
       @openai_admin_key = ENV.fetch('OPENAI_ADMIN_KEY', nil)
       @ssl_verify = ENV.fetch('ORCHESTRA_SSL_VERIFY', 'true') != 'false'
@@ -39,7 +40,7 @@ module OrchestraAI
     def validate!
       errors = []
 
-      if anthropic_api_key.nil? && openai_api_key.nil? && google_api_key.nil?
+      if anthropic_api_key.nil? && openai_api_key.nil? && google_api_key.nil? && mistral_api_key.nil?
         errors << 'At least one API key must be configured'
       end
 
@@ -53,6 +54,7 @@ module OrchestraAI
       when :anthropic then !anthropic_api_key.nil?
       when :openai then !openai_api_key.nil?
       when :google then !google_api_key.nil?
+      when :mistral then !mistral_api_key.nil?
       else false
       end
     end

@@ -34,6 +34,15 @@ class PlannerTest < Minitest::Test
     assert_includes alternatives.keys, :google
     assert_includes alternatives.keys, :openai
     assert_includes alternatives.keys, :anthropic
+    assert_includes alternatives.keys, :mistral
+  end
+
+  def test_alternatives_mistral_ordered_cheapest_first
+    mistral_models = OrchestraAI::Costs::Planner::ALTERNATIVES[:mistral]
+
+    assert_equal 'mistral-small-latest', mistral_models.first
+    assert_equal 'mistral-large-latest', mistral_models.last
+    assert_equal 3, mistral_models.size
   end
 
   # Plan tests

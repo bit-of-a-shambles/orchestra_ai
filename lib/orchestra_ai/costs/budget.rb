@@ -4,7 +4,7 @@ module OrchestraAI
   module Costs
     # Manages per-provider budget limits and spending tracking
     class Budget
-      PROVIDERS = %i[anthropic openai google].freeze
+      PROVIDERS = %i[anthropic openai google mistral].freeze
 
       attr_reader :limits, :spent, :alert_threshold
 

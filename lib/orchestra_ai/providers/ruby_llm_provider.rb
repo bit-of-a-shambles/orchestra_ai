@@ -25,7 +25,12 @@ module OrchestraAI
         # Anthropic Claude 4.6
         'claude-opus-4.6' => { input: 5.00, output: 25.00, context: 200_000, provider: :anthropic },
         'claude-sonnet-4.6' => { input: 3.00, output: 15.00, context: 200_000, provider: :anthropic },
-        'claude-haiku-4.5' => { input: 1.00, output: 5.00, context: 200_000, provider: :anthropic }
+        'claude-haiku-4.5' => { input: 1.00, output: 5.00, context: 200_000, provider: :anthropic },
+
+        # Mistral
+        'mistral-small-latest' => { input: 0.15, output: 0.60, context: 256_000, provider: :mistral },
+        'mistral-medium-latest' => { input: 0.40, output: 2.00, context: 128_000, provider: :mistral },
+        'mistral-large-latest' => { input: 0.50, output: 1.50, context: 256_000, provider: :mistral }
       }.freeze
 
       def initialize(model: nil)
@@ -126,6 +131,7 @@ module OrchestraAI
           c.openai_api_key = config.openai_api_key if config.openai_api_key
           c.anthropic_api_key = config.anthropic_api_key if config.anthropic_api_key
           c.gemini_api_key = config.google_api_key if config.google_api_key
+          c.mistral_api_key = config.mistral_api_key if config.mistral_api_key
         end
       end
 

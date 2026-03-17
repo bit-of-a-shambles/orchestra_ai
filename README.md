@@ -219,7 +219,7 @@ The Reviewer agent is specifically designed to:
 
 ## Features
 
-- **Multi-Provider Support**: OpenAI, Anthropic (Claude), and Google (Gemini)
+- **Multi-Provider Support**: OpenAI, Anthropic (Claude), Google (Gemini), and Mistral
 - **Role-Based Agents**: Architect, Implementer, and Reviewer agents with specialized prompts
 - **Task Difficulty Scoring**: Automatic complexity assessment to select appropriate models
 - **Execution Patterns**: Sequential, Parallel, Pipeline, and Router patterns
@@ -260,6 +260,7 @@ Set your API keys as environment variables:
 export ANTHROPIC_API_KEY="your-key"
 export OPENAI_API_KEY="your-key"
 export GOOGLE_API_KEY="your-key"
+export MISTRAL_API_KEY="your-key"
 
 # Optional: Admin keys for billing/usage API access
 export ANTHROPIC_ADMIN_KEY="sk-ant-admin-..."  # From console.anthropic.com
@@ -348,6 +349,7 @@ OrchestraAI.configure do |c|
   c.anthropic_api_key = ENV["ANTHROPIC_API_KEY"]
   c.openai_api_key = ENV["OPENAI_API_KEY"]
   c.google_api_key = ENV["GOOGLE_API_KEY"]
+  c.mistral_api_key = ENV["MISTRAL_API_KEY"]
   
   # Optional: Admin keys for billing/usage API access
   c.anthropic_admin_key = ENV["ANTHROPIC_ADMIN_KEY"]

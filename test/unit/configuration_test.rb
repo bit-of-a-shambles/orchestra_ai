@@ -74,4 +74,45 @@ class ConfigurationTest < Minitest::Test
     assert_equal %w[codex opencode pi claude], config.development.coding_cli_order
     assert_equal %i[implementer reviewer], config.development.coding_cli_roles
   end
+
+  def test_mistral_api_key_defaults_to_env
+    original = ENV['MISTRAL_API_KEY']
+    ENV['MISTRAL_API_KEY'] = 'test-mistral'
+    config = OrchestraAI::Configuration.new
+    assert_equal 'test-mistral', config.mistral_api_key
+  ensure
+    ENV['MISTRAL_API_KEY'] = original
+  end
+
+  def test_mistral_api_key_defaults_to_nil_when_env_unset
+    original = ENV.delete('MISTRAL_API_KEY')
+    config = OrchestraAI::Configuration.new
+    assert_nil config.mistral_api_key
+  ensure
+    ENV['MISTRAL_API_KEY'] = original
+  end
+
+  def test_provider_available_returns_true_for_mistral_when_key_set
+    config = OrchestraAI::Configuration.new
+    config.mistral_api_key = 'test-mistral-key'
+
+    assert config.provider_available?(:mistral)
+  end
+
+  def test_provider_available_returns_false_for_mistral_when_no_key
+    config = OrchestraAI::Configuration.new
+    config.mistral_api_key = nil
+
+    refute config.provider_available?(:mistral)
+  end
+
+  def test_validate_passes_with_only_mistral_key
+    config = OrchestraAI::Configuration.new
+    config.anthropic_api_key = nil
+    config.openai_api_key = nil
+    config.google_api_key = nil
+    config.mistral_api_key = 'test-mistral-key'
+
+    assert config.validate!
+  end
 end

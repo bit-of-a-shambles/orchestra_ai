@@ -315,7 +315,7 @@ class BudgetTest < Minitest::Test
 
     hash = @budget.to_h
 
-    assert_equal({ anthropic: 10.0, openai: 5.0, google: 2.0 }, hash[:limits])
+    assert_equal({ anthropic: 10.0, openai: 5.0, google: 2.0, mistral: nil }, hash[:limits])
     assert_equal 3.0, hash[:spent][:anthropic]
     assert_equal 7.0, hash[:remaining][:anthropic]
     assert_equal 0.8, hash[:alert_threshold]
@@ -403,6 +403,6 @@ class BudgetTest < Minitest::Test
 
   # Providers constant tests
   def test_providers_constant
-    assert_equal %i[anthropic openai google], OrchestraAI::Costs::Budget::PROVIDERS
+    assert_equal %i[anthropic openai google mistral], OrchestraAI::Costs::Budget::PROVIDERS
   end
 end
